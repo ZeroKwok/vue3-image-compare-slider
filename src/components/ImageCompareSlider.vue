@@ -202,13 +202,13 @@ const handleResize = () => {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #ccc;
+  background-color: #fcfcfc;
   padding: 0 72px;
 
   .container {
     display: flex;
     flex-direction: row;
-    border: 1px solid #000;
+    border: 1px dashed #ccc;
     position: relative;
     height: 100%;
     overflow: hidden;;
