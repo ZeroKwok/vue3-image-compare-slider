@@ -225,12 +225,10 @@ defineExpose({
   height: 100%;
   overflow: hidden;
   background-color: #fcfcfc;
-  padding: 0 72px;
 
   .container {
     display: flex;
     flex-direction: row;
-    border: 1px dashed #ccc;
     position: relative;
     height: 100%;
     overflow: hidden;;

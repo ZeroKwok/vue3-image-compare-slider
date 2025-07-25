@@ -79,30 +79,40 @@ const zoom = ref(100);
 
     .controls {
       position: absolute;
-      right: 10px;
-      top: 50%;
       width: 50px;
+      right: 10px;
+
+      top: 50%;
       transform: translate(0, -50%);
-      
+
       display: flex;
       flex-direction: column;
       padding: 0.5rem;
       gap: 1rem;
 
-      background: rgba(0, 0, 0, 0);
       border-radius: 4px;
       border: 1px solid #999;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      user-select: none;
+
+      &:hover,
+      &:active {
+        background: #ffff;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      }
 
       .zoom {
         :deep(.el-slider__runway) {
-          background-color: rgba(0, 0, 0, 0.2);
-          width: 2px;
+          background-color: #ddd;
+          width: 4px;
           flex-shrink: 0;
-          flex-basis: 2px; 
+          flex-basis: 4px; 
+          border: 1px solid #0005
         }
 
         :deep(.el-slider__bar) {
-          background-color: rgba(0, 0, 0, 0.8);
+          background-color: #fff;
           width: 2px;
           border-radius: 2px;
         }
@@ -111,8 +121,8 @@ const zoom = ref(100);
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background-color: rgba(0, 0, 0, 0.8);
-          border: none !important;
+          background-color: #ffff;
+          border: 1px solid #0005 !important;
           transform: translateX(-25%);
         }
       }
@@ -122,6 +132,10 @@ const zoom = ref(100);
           padding: 0.5rem;
           color: rgba(0, 0, 0, 0.8);
           border-color: rgba(0, 0, 0, 0.8);
+
+          &:focus-visible {
+            outline: 2px solid #000;
+          }
         }
       }
     }
@@ -129,7 +143,7 @@ const zoom = ref(100);
 
   .image-list {
     border: 1px solid #ccc;
-    padding: 3px 0;
+    padding: 3px 3px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 0.6rem;
@@ -149,7 +163,7 @@ const zoom = ref(100);
 
       &.active {
         background-color: #e0f7fa;
-        box-shadow: 0 0 0 2px #1f1f1f;
+        box-shadow: 0 0 0 2px #000;
       }
 
       img {
