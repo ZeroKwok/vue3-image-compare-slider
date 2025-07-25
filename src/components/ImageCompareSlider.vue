@@ -1,0 +1,248 @@
+<template>
+  <div class="image-compare-slider">
+    <div class="container" ref="containerRef" @mousedown.prevent @wheel.prevent="handleWheel">
+      <img :src="srcLeft" class="image left" alt="Left" ref="leftRef" @load="handleImageLoad"
+        @mousedown.passive="startDrag" @touchstart.passive="startDrag">
+      <img :src="srcRight" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad"
+        @mousedown.passive="startDrag" @touchstart.passive="startDrag">
+
+      <div class="slider" ref="sliderRef" :style="{ left: `${sliderPosition}px` }" 
+        @mousedown.passive="(e)=>startDrag(e, true)" @touchstart.passive="(e)=>startDrag(e, true)">
+        <img class="button" src="../assets/icon_button_slider.svg" alt="Slider handle">
+      </div>
+    </div>
+
+    <!-- <VerticalSliderView v-model="zoomVal" @zoom-change="handleZoomChange" :min-zoom="zoomMin" :max-zoom="zoomMax"
+      :zoom-step="zoomStep" /> -->
+  </div>
+</template>
+
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+
+const props = defineProps({
+  srcLeft: {
+    type: String,
+    required: true
+  },
+  srcRight: {
+    type: String,
+    required: true
+  }
+});
+
+const containerRef = ref(null);
+const sliderRef = ref(null);
+const leftRef = ref(null);
+const rightRef = ref(null);
+
+const sliderPosition = ref(0);
+const sliderRatio = ref(0);
+const sliderOffsetX = ref(0);
+
+const moveOffsetX = ref(0);
+const moveOffsetY = ref(0);
+
+const isDragging = ref(false);
+const isSliderDragging = ref(false);
+
+const zoomVal = ref(100);
+const zoomMax = ref(400);
+const zoomMin = ref(10);
+const zoomStep = ref(10);
+
+const clamp = (value, min, max) => {
+  return Math.max(min, Math.min(max, value));
+};
+
+const handleWheel = (e) => {
+  zoomVal.value = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value  : -zoomStep.value ), zoomMin.value , zoomMax.value );
+};
+
+const handleZoomChange = (zoomValue) => {
+  zoomVal.value = zoomValue;
+};
+
+watch(zoomVal, (newZoom) => {
+  updateImageScale(newZoom/100);
+  updateXPositionByRatio(sliderRatio.value);
+});
+
+const getPos = (e) => { 
+  let x, y;
+  if (e.type === 'touchmove') {
+    x = e.touches[0].clientX;
+    y = e.touches[0].clientY;
+  } else {
+    x = e.clientX;
+    y = e.clientY;
+  }
+  return { x, y };
+};
+
+const startDrag = (e, isSlider = false) => {
+  isDragging.value = true;
+  isSliderDragging.value = isSlider;
+
+  if (!isSlider) {
+    initPositionOffset(e);
+  }
+
+  document.addEventListener('mousemove', handleDrag);
+  document.addEventListener('touchmove', handleDrag, { passive: false });
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchend', stopDrag);
+};
+
+const stopDrag = () => {
+  isDragging.value = false;
+  isSliderDragging.value = false;
+  document.removeEventListener('mousemove', handleDrag);
+  document.removeEventListener('touchmove', handleDrag);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchend', stopDrag);
+};
+
+const handleDrag = (e) => {
+  if (!isDragging.value || !containerRef.value)
+    return;
+  e.preventDefault();
+
+  const { x, y } = getPos(e);
+  const clientRect = containerRef.value.getBoundingClientRect()
+  if (isSliderDragging.value) {
+    updateXPosition(x - clientRect.left, clientRect);
+  } else {
+    updatePositionOffset(x - clientRect.left, y - clientRect.top, clientRect);
+  }
+};
+
+const updateXPosition = (x, rect) => { 
+  const zoom = zoomVal.value / 100;
+  const cW = rect.width;
+  const iW = cW * zoom;
+  const cpos = clamp(x, 0, cW);
+  const ratio = cpos / cW;
+
+  const offX = (iW - cW) / 2 - sliderOffsetX.value;
+  const ipos = (cpos + offX) / zoom;
+
+  sliderRatio.value = ratio;
+  sliderPosition.value = cpos;
+  updateImageClipPath(ipos);
+
+  console.log(
+    `update: x: ${x}, rect: ${rect.left}~${rect.right}:${cW}, zoom: ${zoom}, iW: ${iW}, ` +
+    `ratio: ${ratio}, cpos: ${cpos}, ipos: ${ipos}, offX: ${offX}`);
+};
+
+const updateXPositionByRatio = (ratio) => {
+  const rect = containerRef.value.getBoundingClientRect();
+  updateXPosition(rect.width * ratio, rect);
+};
+
+const initPositionOffset = (e) => { 
+    const { x, y } = getPos(e);
+    const imgRect = leftRef.value.getBoundingClientRect();
+    moveOffsetX.value =  x - imgRect.left;
+    moveOffsetY.value =  y - imgRect.top;
+};
+
+const updatePositionOffset = (x, y, rect) => {
+  const imgRect = leftRef.value.getBoundingClientRect();
+  const zoom = zoomVal.value / 100;
+  const cW = rect.width;
+  const iW = cW * zoom;
+  const offX = (iW - cW) / 2;
+  const iX = x - moveOffsetX.value + offX;
+  const iY = y - moveOffsetY.value + imgRect.height / 2;
+
+  sliderOffsetX.value = iX;
+  updateImagePositionOffset(iX, iY);
+  updateXPositionByRatio(sliderRatio.value);
+
+  console.log(
+    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, zoom: ${zoom}, cW: ${cW}, iW: ${iW}, ` +
+    `ox: ${moveOffsetX.value}, oy: ${moveOffsetY.value}`);
+}
+
+const updateImageClipPath = (pos) => {
+  leftRef.value.style.clipPath = `inset(0 calc(100% - ${pos}px) 0 0)`;
+  rightRef.value.style.clipPath = `inset(0 0 0 ${pos}px)`;
+};
+
+const updateImageScale = (zoom) => {
+  leftRef.value.style.transform = `translate(0, -50%) scale(${zoom})`;
+  rightRef.value.style.transform = `translate(0, -50%) scale(${zoom})`;
+};
+
+const updateImagePositionOffset = (x, y) => {
+  leftRef.value.style.left = `${x}px`;
+  leftRef.value.style.top = `${y}px`;
+
+  rightRef.value.style.left = leftRef.value.style.left;
+  rightRef.value.style.top = leftRef.value.style.top;
+};
+
+const handleImageLoad = () => { 
+  updateXPositionByRatio(0.5);
+};
+
+const handleResize = () => {
+  if (!containerRef.value) return;
+  updateXPositionByRatio(sliderRatio.value);
+};
+
+</script>
+
+<style scoped lang="scss">
+.image-compare-slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #ccc;
+  padding: 0 72px;
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    border: 1px solid #000;
+    position: relative;
+    height: 100%;
+    overflow: hidden;;
+
+    .image {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translate(0, -50%);
+      will-change: transform, clip-path;
+
+      width: 100%;
+      object-fit: contain;
+      user-select: none;
+      cursor: move;
+    }
+
+    .slider {
+      position: absolute;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background-color: white;
+      cursor: ew-resize;
+      z-index: 10;
+      touch-action: none;
+      user-select: none;
+      transform: translate(-2px, 0);
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+</style>
