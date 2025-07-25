@@ -198,6 +198,24 @@ const handleResize = () => {
   updateXPositionByRatio(sliderRatio.value);
 };
 
+const setFitMode = (mode) => {
+  console.log('setFitMode: ', mode);
+  switch (mode) {
+    case '1:1':
+      break;
+
+    case 'contain':
+      break;
+
+    case 'scale-down':
+      break;
+  }
+};
+
+defineExpose({
+  setFitMode,
+})
+
 </script>
 
 <style scoped lang="scss">

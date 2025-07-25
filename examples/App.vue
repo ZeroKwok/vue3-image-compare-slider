@@ -7,16 +7,16 @@
         <el-slider class="zoom" v-model="zoom" :min="10" :max="400" :step="10" :vertical="true" height="80px"
           :format-tooltip="val => `Zoom: ${val}%`" />
 
-        <el-dropdown class="fit-mode" @command="mode => fitMode = mode">
+        <el-dropdown class="fit-mode" @command="mode => imageView.setFitMode(mode)">
           <el-button plain>
             <el-icon><FullScreen /></el-icon>
           </el-button>
     
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="OriginalRatio">1:1</el-dropdown-item>
-              <el-dropdown-item command="AutoAdapt">自适应</el-dropdown-item>
-              <el-dropdown-item command="FitWindow">自适应窗口</el-dropdown-item>
+              <el-dropdown-item command="1:1">1:1</el-dropdown-item>
+              <el-dropdown-item command="scale-down">自适应</el-dropdown-item>
+              <el-dropdown-item command="contain">自适应窗口</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
