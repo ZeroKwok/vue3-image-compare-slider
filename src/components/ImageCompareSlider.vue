@@ -124,26 +124,26 @@ const handleDrag = (e) => {
 
 const updateSliderPosition = (x, rect) => { 
   const zoom = zoomVal.value / 100;
-  const cW = rect.width;
-  const iW = cW * zoom;
-  const cpos = clamp(x, 0, cW);
-  const ratio = cpos / cW;
+  const vW = rect.width;          // viewport width
+  const iW = vW * zoom;           // image width
+  const sX = clamp(x, 0, vW);     // slider x
+  const sRatio = sX / vW;         // slider x ratio
 
-  const offX = (iW - cW) / 2 - sliderOffsetX.value;
-  const ipos = (cpos + offX) / zoom;
+  const offX = (iW - vW) / 2 - sliderOffsetX.value;
+  const iX = (sX + offX) / zoom;  // slider x on image
 
-  sliderRatio.value = ratio;
-  sliderPosition.value = cpos;
-  updateImageClipPath(ipos);
+  sliderRatio.value = sRatio;
+  sliderPosition.value = sX;
+  updateImageClipPath(iX);
 
   console.log(
-    `update: x: ${x}, rect: ${rect.left}~${rect.right}:${cW}, zoom: ${zoom}, iW: ${iW}, ` +
-    `ratio: ${ratio}, cpos: ${cpos}, ipos: ${ipos}, offX: ${offX}`);
+    `update: x: ${x}, rect: ${rect.left}~${rect.right}:${vW}, zoom: ${zoom}, iW: ${iW}, ` +
+    `sRatio: ${sRatio}, sX: ${sX}, iX: ${iX}, offX: ${offX}`);
 };
 
-const updateSliderPositionByRatio = (ratio) => {
+const updateSliderPositionByRatio = (sRatio) => {
   const rect = containerRef.value.getBoundingClientRect();
-  updateSliderPosition(rect.width * ratio, rect);
+  updateSliderPosition(rect.width * sRatio, rect);
 };
 
 const initImagePositionOffset = (e) => { 
@@ -156,9 +156,9 @@ const initImagePositionOffset = (e) => {
 const updateImagePosition = (x, y, rect) => {
   const imgRect = leftRef.value.getBoundingClientRect();
   const zoom = zoomVal.value / 100;
-  const cW = rect.width;
-  const iW = cW * zoom;
-  const offX = (iW - cW) / 2;
+  const vW = rect.width;
+  const iW = vW * zoom;
+  const offX = (iW - vW) / 2;
   const iX = x - moveOffsetX.value + offX;
   const iY = y - moveOffsetY.value + imgRect.height / 2;
 
@@ -167,7 +167,7 @@ const updateImagePosition = (x, y, rect) => {
   updateSliderPositionByRatio(sliderRatio.value);
 
   console.log(
-    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, zoom: ${zoom}, cW: ${cW}, iW: ${iW}, ` +
+    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, zoom: ${zoom}, vW: ${vW}, iW: ${iW}, ` +
     `ox: ${moveOffsetX.value}, oy: ${moveOffsetY.value}`);
 }
 
