@@ -11,9 +11,6 @@
         <img class="button" src="../assets/icon_button_slider.svg" alt="Slider handle">
       </div>
     </div>
-
-    <!-- <VerticalSliderView v-model="zoomVal" @zoom-change="handleZoomChange" :min-zoom="zoomMin" :max-zoom="zoomMax"
-      :zoom-step="zoomStep" /> -->
   </div>
 </template>
 
@@ -29,8 +26,14 @@ const props = defineProps({
   srcRight: {
     type: String,
     required: true
+  },
+  zoom: {
+    type: Number,
+    default: 100
   }
 });
+
+const emit = defineEmits(['update:zoom'])
 
 const containerRef = ref(null);
 const sliderRef = ref(null);
@@ -47,7 +50,7 @@ const moveOffsetY = ref(0);
 const isDragging = ref(false);
 const isSliderDragging = ref(false);
 
-const zoomVal = ref(100);
+const zoomVal = ref(props.zoom);
 const zoomMax = ref(400);
 const zoomMin = ref(10);
 const zoomStep = ref(10);
@@ -60,13 +63,14 @@ const handleWheel = (e) => {
   zoomVal.value = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value  : -zoomStep.value ), zoomMin.value , zoomMax.value );
 };
 
-const handleZoomChange = (zoomValue) => {
-  zoomVal.value = zoomValue;
-};
-
 watch(zoomVal, (newZoom) => {
+  emit('update:zoom', newZoom);
   updateImageScale(newZoom/100);
   updateXPositionByRatio(sliderRatio.value);
+});
+
+watch(() => props.zoom, (newVal) => {
+  zoomVal.value = newVal;
 });
 
 const getPos = (e) => { 

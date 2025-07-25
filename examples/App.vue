@@ -1,7 +1,27 @@
 <template>
   <div class="container">
     <div class="image-viewer">
-      <ImageSliderCompare :srcLeft="currentLeft" :srcRight="currentRight" />
+      <ImageSliderCompare ref="imageView" :srcLeft="currentLeft" :srcRight="currentRight" v-model:zoom="zoom" :fit="fitMode" />
+
+      <div class="controls">
+        <el-slider class="zoom" v-model="zoom" :min="10" :max="400" :step="10" :vertical="true" height="80px"
+          :format-tooltip="val => `Zoom: ${val}%`" />
+
+        <el-dropdown class="fit-mode" @command="mode => fitMode = mode">
+          <el-button plain>
+            <el-icon><FullScreen /></el-icon>
+          </el-button>
+    
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="OriginalRatio">1:1</el-dropdown-item>
+              <el-dropdown-item command="AutoAdapt">自适应</el-dropdown-item>
+              <el-dropdown-item command="FitWindow">自适应窗口</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+
     </div>
 
     <div class="image-list">
@@ -34,6 +54,11 @@ const currentName = ref(examples[0]);
 const getItemImage = (name, label = '1') => `./public/${name}/${label}.jpg`;
 const currentLeft = computed(() => getItemImage(currentName.value, '1'));
 const currentRight = computed(() => getItemImage(currentName.value, '2'));
+
+const imageView = ref(null);
+const fitMode = ref('contain');
+const zoom = ref(100);
+
 </script>
 
 <style lang="scss" scoped>
@@ -50,6 +75,56 @@ const currentRight = computed(() => getItemImage(currentName.value, '2'));
   .image-viewer {
     flex-grow: 1;
     border: 1px solid #ccc;
+    position: relative;
+
+    .controls {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      width: 50px;
+      transform: translate(0, -50%);
+      
+      display: flex;
+      flex-direction: column;
+      padding: 0.5rem;
+      gap: 1rem;
+
+      background: rgba(0, 0, 0, 0);
+      border-radius: 4px;
+      border: 1px solid #999;
+
+      .zoom {
+        :deep(.el-slider__runway) {
+          background-color: rgba(0, 0, 0, 0.2);
+          width: 2px;
+          flex-shrink: 0;
+          flex-basis: 2px; 
+        }
+
+        :deep(.el-slider__bar) {
+          background-color: rgba(0, 0, 0, 0.8);
+          width: 2px;
+          border-radius: 2px;
+        }
+
+        :deep(.el-slider__button) {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: rgba(0, 0, 0, 0.8);
+          border: none !important;
+          transform: translateX(-25%);
+        }
+      }
+
+      .fit-mode {
+        button {
+          padding: 0.5rem;
+          color: rgba(0, 0, 0, 0.8);
+          border-color: rgba(0, 0, 0, 0.8);
+        }
+      }
+    }
   }
 
   .image-list {
@@ -93,5 +168,6 @@ const currentRight = computed(() => getItemImage(currentName.value, '2'));
       }
     }
   }
+
 }
 </style>
