@@ -66,7 +66,7 @@ const handleWheel = (e) => {
 watch(zoomVal, (newZoom) => {
   emit('update:zoom', newZoom);
   updateImageScale(newZoom/100);
-  updateXPositionByRatio(sliderRatio.value);
+  updateSliderPositionByRatio(sliderRatio.value);
 });
 
 watch(() => props.zoom, (newVal) => {
@@ -90,7 +90,7 @@ const startDrag = (e, isSlider = false) => {
   isSliderDragging.value = isSlider;
 
   if (!isSlider) {
-    initPositionOffset(e);
+    initImagePositionOffset(e);
   }
 
   document.addEventListener('mousemove', handleDrag);
@@ -116,13 +116,13 @@ const handleDrag = (e) => {
   const { x, y } = getPos(e);
   const clientRect = containerRef.value.getBoundingClientRect()
   if (isSliderDragging.value) {
-    updateXPosition(x - clientRect.left, clientRect);
+    updateSliderPosition(x - clientRect.left, clientRect);
   } else {
-    updatePositionOffset(x - clientRect.left, y - clientRect.top, clientRect);
+    updateImagePosition(x - clientRect.left, y - clientRect.top, clientRect);
   }
 };
 
-const updateXPosition = (x, rect) => { 
+const updateSliderPosition = (x, rect) => { 
   const zoom = zoomVal.value / 100;
   const cW = rect.width;
   const iW = cW * zoom;
@@ -141,19 +141,19 @@ const updateXPosition = (x, rect) => {
     `ratio: ${ratio}, cpos: ${cpos}, ipos: ${ipos}, offX: ${offX}`);
 };
 
-const updateXPositionByRatio = (ratio) => {
+const updateSliderPositionByRatio = (ratio) => {
   const rect = containerRef.value.getBoundingClientRect();
-  updateXPosition(rect.width * ratio, rect);
+  updateSliderPosition(rect.width * ratio, rect);
 };
 
-const initPositionOffset = (e) => { 
+const initImagePositionOffset = (e) => { 
     const { x, y } = getPos(e);
     const imgRect = leftRef.value.getBoundingClientRect();
     moveOffsetX.value =  x - imgRect.left;
     moveOffsetY.value =  y - imgRect.top;
 };
 
-const updatePositionOffset = (x, y, rect) => {
+const updateImagePosition = (x, y, rect) => {
   const imgRect = leftRef.value.getBoundingClientRect();
   const zoom = zoomVal.value / 100;
   const cW = rect.width;
@@ -164,7 +164,7 @@ const updatePositionOffset = (x, y, rect) => {
 
   sliderOffsetX.value = iX;
   updateImagePositionOffset(iX, iY);
-  updateXPositionByRatio(sliderRatio.value);
+  updateSliderPositionByRatio(sliderRatio.value);
 
   console.log(
     `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, zoom: ${zoom}, cW: ${cW}, iW: ${iW}, ` +
@@ -190,12 +190,12 @@ const updateImagePositionOffset = (x, y) => {
 };
 
 const handleImageLoad = () => { 
-  updateXPositionByRatio(0.5);
+  updateSliderPositionByRatio(0.5);
 };
 
 const handleResize = () => {
   if (!containerRef.value) return;
-  updateXPositionByRatio(sliderRatio.value);
+  updateSliderPositionByRatio(sliderRatio.value);
 };
 
 const setFitMode = (mode) => {
@@ -225,6 +225,7 @@ defineExpose({
   height: 100%;
   overflow: hidden;
   background-color: #fcfcfc;
+  user-select: none;
 
   .container {
     display: flex;

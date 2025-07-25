@@ -40,11 +40,11 @@ import ImageSliderCompare from "vue3-image-compare-slider";
 
 const examples = [
   'portrait-265',
+  'bigger',
+  'dark tone',
   'bit',
   'colour',
-  'dark tone',
   'different',
-  'bigger',
   'look like 1',
   'look like 2',
   'look like 3',
