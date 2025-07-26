@@ -175,7 +175,7 @@ const updateImagePosition = (x, y, rect) => {
   const iY = y - clickOffsetY.value + offY;
 
   sliderOffsetX.value = iX;
-  updateImagePositionLeftTop(iX, iY);
+  updateImagePositionAttribute(iX, iY);
   updateSliderPositionByRatio(sliderRatio.value);
 
   console.log(
@@ -195,7 +195,10 @@ const updateImageScale = (zoom) => {
   rightRef.value.style.transform = `scale(${zoom})`;
 };
 
-const updateImagePositionLeftTop = (x, y) => {
+const updateImagePositionAttribute = (x, y) => {
+  // 两个图片可能是不同大小，因此需要调整到相同大小
+  // 具体为: 以最大尺寸图像为基准，同比例缩放另一图片
+
   leftRef.value.style.left = `${x}px`;
   leftRef.value.style.top = `${y}px`;
 
