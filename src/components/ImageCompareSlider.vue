@@ -1,9 +1,9 @@
 <template>
   <div class="image-compare-slider">
-    <div class="container" ref="containerRef" @mousedown.prevent @wheel.prevent="handleWheel">
-      <img :src="srcLeft" class="image left" alt="Left" ref="leftRef" @load="handleImageLoad"
+    <div class="viewport" ref="viewportRef" @mousedown.prevent @wheel.prevent="handleWheel">
+      <img :src="left" class="image left" alt="Left" ref="leftRef" @load="handleImageLoad"
         @mousedown.passive="startDrag" @touchstart.passive="startDrag">
-      <img :src="srcRight" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad"
+      <img :src="right" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad"
         @mousedown.passive="startDrag" @touchstart.passive="startDrag">
 
       <div class="slider" ref="sliderRef" :style="{ left: `${sliderPosition}px` }" 
@@ -19,11 +19,11 @@
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
 
 const props = defineProps({
-  srcLeft: {
+  left: {
     type: String,
     required: true
   },
-  srcRight: {
+  right: {
     type: String,
     required: true
   },
@@ -35,7 +35,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:zoom'])
 
-const containerRef = ref(null);
+const viewportRef = ref(null);
 const sliderRef = ref(null);
 const leftRef = ref(null);
 const rightRef = ref(null);
@@ -109,12 +109,12 @@ const stopDrag = () => {
 };
 
 const handleDrag = (e) => {
-  if (!isDragging.value || !containerRef.value)
+  if (!isDragging.value || !viewportRef.value)
     return;
   e.preventDefault();
 
   const { x, y } = getPos(e);
-  const clientRect = containerRef.value.getBoundingClientRect()
+  const clientRect = viewportRef.value.getBoundingClientRect()
   if (isSliderDragging.value) {
     updateSliderPosition(x - clientRect.left, clientRect);
   } else {
@@ -142,7 +142,7 @@ const updateSliderPosition = (x, rect) => {
 };
 
 const updateSliderPositionByRatio = (sRatio) => {
-  const rect = containerRef.value.getBoundingClientRect();
+  const rect = viewportRef.value.getBoundingClientRect();
   updateSliderPosition(rect.width * sRatio, rect);
 };
 
@@ -194,7 +194,7 @@ const handleImageLoad = () => {
 };
 
 const handleResize = () => {
-  if (!containerRef.value) return;
+  if (!viewportRef.value) return;
   updateSliderPositionByRatio(sliderRatio.value);
 };
 
@@ -227,7 +227,7 @@ defineExpose({
   background-color: #fcfcfc;
   user-select: none;
 
-  .container {
+  .viewport {
     display: flex;
     flex-direction: row;
     position: relative;

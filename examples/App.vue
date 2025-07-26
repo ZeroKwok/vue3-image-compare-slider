@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="image-viewer">
-      <ImageSliderCompare ref="imageView" :srcLeft="currentLeft" :srcRight="currentRight" v-model:zoom="zoom" :fit="fitMode" />
+      <ImageSliderCompare ref="imageView" :left="currentLeft" :right="currentRight" v-model:zoom="zoom" :fit="fitMode" />
 
       <div class="controls">
         <el-slider class="zoom" v-model="zoom" :min="10" :max="400" :step="10" :vertical="true" height="80px"
