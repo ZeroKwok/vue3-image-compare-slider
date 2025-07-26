@@ -1,17 +1,20 @@
 <template>
   <div class="container">
     <div class="image-viewer">
-      <ImageSliderCompare ref="imageView" :left="currentLeft" :right="currentRight" v-model:zoom="zoom" :fit="fitMode" />
+      <ImageSliderCompare ref="imageView" :left="currentLeft" :right="currentRight" v-model:zoom="zoom"
+        :zoomRange="zoomRange" :fit="fitMode" />
 
       <div class="controls">
-        <el-slider class="zoom" v-model="zoom" :min="10" :max="400" :step="10" :vertical="true" height="80px"
+        <el-slider class="zoom" v-model="zoom" :min="zoomRange.min" :max="zoomRange.max" :step="zoomRange.step" :vertical="true" height="80px"
           :format-tooltip="val => `Zoom: ${val}%`" />
 
         <el-dropdown class="fit-mode" @command="mode => imageView.setFitMode(mode)">
           <el-button plain>
-            <el-icon><FullScreen /></el-icon>
+            <el-icon>
+              <FullScreen />
+            </el-icon>
           </el-button>
-    
+
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="1:1">1:1</el-dropdown-item>
@@ -58,6 +61,7 @@ const currentRight = computed(() => getItemImage(currentName.value, '2'));
 const imageView = ref(null);
 const fitMode = ref('contain');
 const zoom = ref(100);
+const zoomRange = {min: 0, max: 400, step: 50};
 
 </script>
 
@@ -107,7 +111,7 @@ const zoom = ref(100);
           background-color: #ddd;
           width: 4px;
           flex-shrink: 0;
-          flex-basis: 4px; 
+          flex-basis: 4px;
           border: 1px solid #0005
         }
 

@@ -30,7 +30,11 @@ const props = defineProps({
   zoom: {
     type: Number,
     default: 100
-  }
+  },
+  zoomRange: {
+    type: Object,
+    default: () => ({min: 10, max: 400, step: 10})
+  },
 });
 
 const emit = defineEmits(['update:zoom'])
@@ -44,16 +48,16 @@ const sliderPosition = ref(0);
 const sliderRatio = ref(0);
 const sliderOffsetX = ref(0);
 
-const moveOffsetX = ref(0);
-const moveOffsetY = ref(0);
+const clickOffsetX = ref(0);
+const clickOffsetY = ref(0);
 
 const isDragging = ref(false);
 const isSliderDragging = ref(false);
 
-const zoomVal = ref(props.zoom);
-const zoomMax = ref(400);
-const zoomMin = ref(10);
-const zoomStep = ref(10);
+const zoomVal  = ref(props.zoom);
+const zoomMin  = ref(props.zoomRange.min);
+const zoomMax  = ref(props.zoomRange.max);
+const zoomStep = ref(props.zoomRange.step);
 
 const clamp = (value, min, max) => {
   return Math.max(min, Math.min(max, value));
@@ -114,11 +118,11 @@ const handleDrag = (e) => {
   e.preventDefault();
 
   const { x, y } = getPos(e);
-  const clientRect = viewportRef.value.getBoundingClientRect()
+  const viewportRect = viewportRef.value.getBoundingClientRect()
   if (isSliderDragging.value) {
-    updateSliderPosition(x - clientRect.left, clientRect);
+    updateSliderPosition(x - viewportRect.left, viewportRect);
   } else {
-    updateImagePosition(x - clientRect.left, y - clientRect.top, clientRect);
+    updateImagePosition(x - viewportRect.left, y - viewportRect.top, viewportRect);
   }
 };
 
@@ -149,26 +153,36 @@ const updateSliderPositionByRatio = (sRatio) => {
 const initImagePositionOffset = (e) => { 
     const { x, y } = getPos(e);
     const imgRect = leftRef.value.getBoundingClientRect();
-    moveOffsetX.value =  x - imgRect.left;
-    moveOffsetY.value =  y - imgRect.top;
+
+    // 计算点击位置相对于图片的左上角的偏移量
+    clickOffsetX.value =  x - imgRect.left;
+    clickOffsetY.value =  y - imgRect.top;
 };
 
 const updateImagePosition = (x, y, rect) => {
-  const imgRect = leftRef.value.getBoundingClientRect();
+  const imgRect = leftRef.value.getBoundingClientRect(); // 实际图片尺寸(包含缩放后)
   const zoom = zoomVal.value / 100;
-  const vW = rect.width;
-  const iW = vW * zoom;
-  const offX = (iW - vW) / 2;
-  const iX = x - moveOffsetX.value + offX;
-  const iY = y - moveOffsetY.value + imgRect.height / 2;
+  const vW = rect.width;                          // 视口尺寸
+  const vH = rect.height;
+  const iW = leftRef.value.width * zoom;          // 图片尺寸(缩放后)
+  const iH = leftRef.value.height * zoom;
+
+  // 图片的x(left), y(top) 缩放偏移, 原始尺寸下总是0
+  // 因为缩放后图像 x,y 位置不变, 因此需要一个偏移量来对冲这个变化
+  const offX = (iW - leftRef.value.width) / 2;
+  const offY = (iH - leftRef.value.height) / 2;
+  const iX = x - clickOffsetX.value + offX;
+  const iY = y - clickOffsetY.value + offY;
 
   sliderOffsetX.value = iX;
-  updateImagePositionOffset(iX, iY);
+  updateImagePositionLeftTop(iX, iY);
   updateSliderPositionByRatio(sliderRatio.value);
 
   console.log(
-    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, zoom: ${zoom}, vW: ${vW}, iW: ${iW}, ` +
-    `ox: ${moveOffsetX.value}, oy: ${moveOffsetY.value}`);
+    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, ` +
+    `zoom: ${zoom}, view: ${vW}x${vH}, image: ${iW}x${iH}, ` +
+    `ox: ${clickOffsetX.value}, oy: ${clickOffsetY.value}, ofx: ${offX}, ofy: ${offY}, ` +
+    `ix: ${iX}, iy: ${iY}`);
 }
 
 const updateImageClipPath = (pos) => {
@@ -177,11 +191,11 @@ const updateImageClipPath = (pos) => {
 };
 
 const updateImageScale = (zoom) => {
-  leftRef.value.style.transform = `translate(0, -50%) scale(${zoom})`;
-  rightRef.value.style.transform = `translate(0, -50%) scale(${zoom})`;
+  leftRef.value.style.transform = `scale(${zoom})`;
+  rightRef.value.style.transform = `scale(${zoom})`;
 };
 
-const updateImagePositionOffset = (x, y) => {
+const updateImagePositionLeftTop = (x, y) => {
   leftRef.value.style.left = `${x}px`;
   leftRef.value.style.top = `${y}px`;
 
@@ -236,9 +250,10 @@ defineExpose({
 
     .image {
       position: absolute;
-      top: 50%;
       left: 0;
-      transform: translate(0, -50%);
+      top: 0;
+      // top: 50%;
+      // transform: translate(0, -50%);
       will-change: transform, clip-path;
 
       width: 100%;
