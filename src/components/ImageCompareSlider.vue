@@ -1,9 +1,9 @@
 <template>
   <div class="image-compare-slider">
     <div class="viewport" ref="viewportRef" @mousedown.prevent @wheel.prevent="handleWheel">
-      <img :src="left" class="image left" alt="Left" ref="leftRef" @load="handleImageLoad"
+      <img :src="left" class="image left" alt="Left" ref="leftRef" @load="handleImageLoad(true)"
         @mousedown.passive="startDrag" @touchstart.passive="startDrag">
-      <img :src="right" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad"
+      <img :src="right" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad(false)"
         @mousedown.passive="startDrag" @touchstart.passive="startDrag">
 
       <div class="slider" ref="sliderRef" :style="{ left: `${sliderPosition}px` }" 
@@ -43,6 +43,7 @@ const viewportRef = ref(null);
 const sliderRef = ref(null);
 const leftRef = ref(null);
 const rightRef = ref(null);
+const imageSize = ref({width: 0, height: 0});
 
 const sliderPosition = ref(0);
 const sliderRatio = ref(0);
@@ -95,6 +96,8 @@ const startDrag = (e, isSlider = false) => {
 
   if (!isSlider) {
     initImagePositionOffset(e);
+    leftRef.value.classList.add('draging');
+    rightRef.value.classList.add('draging');
   }
 
   document.addEventListener('mousemove', handleDrag);
@@ -106,6 +109,10 @@ const startDrag = (e, isSlider = false) => {
 const stopDrag = () => {
   isDragging.value = false;
   isSliderDragging.value = false;
+
+  leftRef.value.classList.remove('draging');
+  rightRef.value.classList.remove('draging');
+
   document.removeEventListener('mousemove', handleDrag);
   document.removeEventListener('touchmove', handleDrag);
   document.removeEventListener('mouseup', stopDrag);
@@ -196,8 +203,6 @@ const updateImageScale = (zoom) => {
 };
 
 const updateImagePositionAttribute = (x, y) => {
-  // 两个图片可能是不同大小，因此需要调整到相同大小
-  // 具体为: 以最大尺寸图像为基准，同比例缩放另一图片
 
   leftRef.value.style.left = `${x}px`;
   leftRef.value.style.top = `${y}px`;
@@ -206,7 +211,42 @@ const updateImagePositionAttribute = (x, y) => {
   rightRef.value.style.top = leftRef.value.style.top;
 };
 
-const handleImageLoad = () => { 
+// 重置图像属性
+const clearImageAttribute = (imgRef) => {
+  imgRef.value.loaded = false;
+};
+watch(() => props.left, (val) => { clearImageAttribute(leftRef); });
+watch(() => props.right, (val) => { clearImageAttribute(rightRef); });
+
+const handleImageLoad = (isLeft) => {
+  if (!leftRef.value || !rightRef.value) return;
+  if (isLeft)
+      leftRef.value.loaded = true;
+  else
+      rightRef.value.loaded = true;
+  if (!leftRef.value.loaded || !rightRef.value.loaded) return;
+
+  const leftArea = leftRef.value.naturalWidth * leftRef.value.naturalHeight;
+  const rightArea = rightRef.value.naturalWidth * rightRef.value.naturalHeight;
+  if (leftArea != rightArea) {
+    // 两个图片可能是不同大小，因此需要调整到相同大小
+    // 具体为: 以最大尺寸图 或 右图为基准，同比例缩放另一图片
+    if (leftArea > rightArea) {
+      imageSize.value.width = leftRef.value.naturalWidth;
+      imageSize.value.height = leftRef.value.naturalHeight;
+    }
+    else {
+      imageSize.value.width = rightRef.value.naturalWidth;
+      imageSize.value.height = rightRef.value.naturalHeight;
+    }
+
+    leftRef.value.width = imageSize.value.width;
+    leftRef.value.height = imageSize.value.height;
+    rightRef.value.width = imageSize.value.width;
+    rightRef.value.height = imageSize.value.height;
+  }
+
+  zoomVal.value = 100;
   updateSliderPositionByRatio(0.5);
 };
 
@@ -217,14 +257,21 @@ const handleResize = () => {
 
 const setFitMode = (mode) => {
   console.log('setFitMode: ', mode);
+  zoomVal.value = 100;
   switch (mode) {
     case '1:1':
+      leftRef.value.style.objectFit = 'none';
+      rightRef.value.style.objectFit = 'none';
       break;
 
     case 'contain':
+      leftRef.value.style.objectFit = 'contain';
+      rightRef.value.style.objectFit = 'contain';
       break;
 
     case 'scale-down':
+      leftRef.value.style.objectFit = 'scale-down';
+      rightRef.value.style.objectFit = 'scale-down';
       break;
   }
 };
@@ -255,14 +302,22 @@ defineExpose({
       position: absolute;
       left: 0;
       top: 0;
+
       // top: 50%;
       // transform: translate(0, -50%);
+
+      /* 图像跟随父窗口缩放 */
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       will-change: transform, clip-path;
 
-      width: 100%;
-      object-fit: contain;
       user-select: none;
-      cursor: move;
+      cursor: grab;
+
+      &.draging {
+        cursor: grabbing;
+      }
     }
 
     .slider {
