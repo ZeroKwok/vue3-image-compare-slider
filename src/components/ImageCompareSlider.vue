@@ -157,6 +157,14 @@ const updateSliderPositionByRatio = (sRatio) => {
   updateSliderPosition(rect.width * sRatio, rect);
 };
 
+const getSizeByContain = (size, containerSize) => {
+  const ratio = Math.min(containerSize.width / size.width, containerSize.height / size.height);
+  return {
+    width: size.width * ratio,
+    height: size.height * ratio
+  };
+};
+
 const initImagePositionOffset = (e) => {
   const { x, y } = getPos(e);
   const imgRect = leftRef.value.getBoundingClientRect();
@@ -171,15 +179,16 @@ const updateImagePosition = (x, y, rect) => {
   const zoom = zoomVal.value / 100;
   const vW = rect.width;                          // 视口尺寸
   const vH = rect.height;
-  const iW = leftRef.value.width * zoom;          // 图片尺寸(缩放后)
+  const iW = leftRef.value.width * zoom;          // 图片尺寸(缩放后), contain 模式下, width 和 height 与视口相同
   const iH = leftRef.value.height * zoom;
 
   // 图片的x(left), y(top) 缩放偏移, 原始尺寸下总是0
   // 因为缩放后图像 x,y 位置不变, 因此需要一个偏移量来对冲这个变化
   const offX = (iW - leftRef.value.width) / 2;
   const offY = (iH - leftRef.value.height) / 2;
-  const iX = x - clickOffsetX.value + offX;
-  const iY = y - clickOffsetY.value + offY;
+
+  let iX = x - clickOffsetX.value + offX;
+  let iY = y - clickOffsetY.value + offY;
 
   sliderOffsetX.value = iX;
   updateImagePositionAttribute(iX, iY);
@@ -208,14 +217,6 @@ const updateImagePositionAttribute = (x, y) => {
 
   rightRef.value.style.left = leftRef.value.style.left;
   rightRef.value.style.top = leftRef.value.style.top;
-};
-
-const getSizeByContain = (size, containerSize) => {
-  const ratio = Math.min(containerSize.width / size.width, containerSize.height / size.height);
-  return {
-    width: size.width * ratio,
-    height: size.height * ratio
-  };
 };
 
 // 重置图像属性
