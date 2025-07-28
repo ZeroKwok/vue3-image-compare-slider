@@ -6,8 +6,8 @@
       <img :src="right" class="image right" alt="Right" ref="rightRef" @load="handleImageLoad(false)"
         @mousedown.passive="startDrag" @touchstart.passive="startDrag">
 
-      <div class="slider" ref="sliderRef" :style="{ left: `${sliderPosition}px` }" 
-        @mousedown.passive="(e)=>startDrag(e, true)" @touchstart.passive="(e)=>startDrag(e, true)">
+      <div class="slider" ref="sliderRef" :style="{ left: `${sliderPosition}px` }"
+        @mousedown.passive="(e) => startDrag(e, true)" @touchstart.passive="(e) => startDrag(e, true)">
         <img class="button" src="../assets/icon_button_slider.svg" alt="Slider handle">
       </div>
     </div>
@@ -16,6 +16,7 @@
 
 
 <script setup>
+import { sl } from 'element-plus/es/locales.mjs';
 import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
 
 const props = defineProps({
@@ -33,7 +34,7 @@ const props = defineProps({
   },
   zoomRange: {
     type: Object,
-    default: () => ({min: 10, max: 400, step: 10})
+    default: () => ({ min: 10, max: 400, step: 10 })
   },
 });
 
@@ -43,7 +44,7 @@ const viewportRef = ref(null);
 const sliderRef = ref(null);
 const leftRef = ref(null);
 const rightRef = ref(null);
-const imageSize = ref({width: 0, height: 0});
+let   imageRef = ref(null);
 
 const sliderPosition = ref(0);
 const sliderRatio = ref(0);
@@ -55,22 +56,24 @@ const clickOffsetY = ref(0);
 const isDragging = ref(false);
 const isSliderDragging = ref(false);
 
-const zoomVal  = ref(props.zoom);
-const zoomMin  = ref(props.zoomRange.min);
-const zoomMax  = ref(props.zoomRange.max);
+const zoomVal = ref(props.zoom);
+const zoomMin = ref(props.zoomRange.min);
+const zoomMax = ref(props.zoomRange.max);
 const zoomStep = ref(props.zoomRange.step);
+
+const fitMode = ref('contain');
 
 const clamp = (value, min, max) => {
   return Math.max(min, Math.min(max, value));
 };
 
 const handleWheel = (e) => {
-  zoomVal.value = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value  : -zoomStep.value ), zoomMin.value , zoomMax.value );
+  zoomVal.value = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value : -zoomStep.value), zoomMin.value, zoomMax.value);
 };
 
 watch(zoomVal, (newZoom) => {
   emit('update:zoom', newZoom);
-  updateImageScale(newZoom/100);
+  updateImageScale(newZoom / 100);
   updateSliderPositionByRatio(sliderRatio.value);
 });
 
@@ -78,7 +81,7 @@ watch(() => props.zoom, (newVal) => {
   zoomVal.value = newVal;
 });
 
-const getPos = (e) => { 
+const getPos = (e) => {
   let x, y;
   if (e.type === 'touchmove') {
     x = e.touches[0].clientX;
@@ -133,7 +136,7 @@ const handleDrag = (e) => {
   }
 };
 
-const updateSliderPosition = (x, rect) => { 
+const updateSliderPosition = (x, rect) => {
   const zoom = zoomVal.value / 100;
   const vW = rect.width;          // viewport width
   const iW = vW * zoom;           // image width
@@ -157,13 +160,13 @@ const updateSliderPositionByRatio = (sRatio) => {
   updateSliderPosition(rect.width * sRatio, rect);
 };
 
-const initImagePositionOffset = (e) => { 
-    const { x, y } = getPos(e);
-    const imgRect = leftRef.value.getBoundingClientRect();
+const initImagePositionOffset = (e) => {
+  const { x, y } = getPos(e);
+  const imgRect = leftRef.value.getBoundingClientRect();
 
-    // 计算点击位置相对于图片的左上角的偏移量
-    clickOffsetX.value =  x - imgRect.left;
-    clickOffsetY.value =  y - imgRect.top;
+  // 计算点击位置相对于图片的左上角的偏移量
+  clickOffsetX.value = x - imgRect.left;
+  clickOffsetY.value = y - imgRect.top;
 };
 
 const updateImagePosition = (x, y, rect) => {
@@ -203,12 +206,19 @@ const updateImageScale = (zoom) => {
 };
 
 const updateImagePositionAttribute = (x, y) => {
-
   leftRef.value.style.left = `${x}px`;
   leftRef.value.style.top = `${y}px`;
 
   rightRef.value.style.left = leftRef.value.style.left;
   rightRef.value.style.top = leftRef.value.style.top;
+};
+
+const getSizeByContain = (size, containerSize) => {
+  const ratio = Math.min(containerSize.width / size.width, containerSize.height / size.height);
+  return {
+    width: size.width * ratio,
+    height: size.height * ratio
+  };
 };
 
 // 重置图像属性
@@ -221,59 +231,57 @@ watch(() => props.right, (val) => { clearImageAttribute(rightRef); });
 const handleImageLoad = (isLeft) => {
   if (!leftRef.value || !rightRef.value) return;
   if (isLeft)
-      leftRef.value.loaded = true;
+    leftRef.value.loaded = true;
   else
-      rightRef.value.loaded = true;
+    rightRef.value.loaded = true;
   if (!leftRef.value.loaded || !rightRef.value.loaded) return;
 
+  // 两个图片可能是不同大小，因此需要调整到相同大小
+  // 具体为: 以最大尺寸图 或 右图为基准，同比例缩放另一图片
   const leftArea = leftRef.value.naturalWidth * leftRef.value.naturalHeight;
   const rightArea = rightRef.value.naturalWidth * rightRef.value.naturalHeight;
-  if (leftArea != rightArea) {
-    // 两个图片可能是不同大小，因此需要调整到相同大小
-    // 具体为: 以最大尺寸图 或 右图为基准，同比例缩放另一图片
-    if (leftArea > rightArea) {
-      imageSize.value.width = leftRef.value.naturalWidth;
-      imageSize.value.height = leftRef.value.naturalHeight;
-    }
-    else {
-      imageSize.value.width = rightRef.value.naturalWidth;
-      imageSize.value.height = rightRef.value.naturalHeight;
-    }
 
-    leftRef.value.width = imageSize.value.width;
-    leftRef.value.height = imageSize.value.height;
-    rightRef.value.width = imageSize.value.width;
-    rightRef.value.height = imageSize.value.height;
-  }
+  imageRef = leftRef;
+  if (leftArea < rightArea)
+    imageRef = rightRef;
 
   zoomVal.value = 100;
+  sliderOffsetX.value = 0;
+  updateImagePositionAttribute(0, 0);
   updateSliderPositionByRatio(0.5);
-};
-
-const handleResize = () => {
-  if (!viewportRef.value) return;
-  updateSliderPositionByRatio(sliderRatio.value);
 };
 
 const setFitMode = (mode) => {
   console.log('setFitMode: ', mode);
-  zoomVal.value = 100;
+
+  const viewportRect = viewportRef.value.getBoundingClientRect();
+  const imageSize = {
+    width: imageRef.value.naturalWidth,
+    height: imageRef.value.naturalHeight
+  };
+  const vusualSize = getSizeByContain(imageSize, viewportRef.value.getBoundingClientRect());
+  const zoomFactor = vusualSize.width / imageSize.width;
+
   switch (mode) {
     case '1:1':
-      leftRef.value.style.objectFit = 'none';
-      rightRef.value.style.objectFit = 'none';
+      zoomVal.value = 100 / zoomFactor;
       break;
 
     case 'contain':
-      leftRef.value.style.objectFit = 'contain';
-      rightRef.value.style.objectFit = 'contain';
+      zoomVal.value = 100;
       break;
 
     case 'scale-down':
-      leftRef.value.style.objectFit = 'scale-down';
-      rightRef.value.style.objectFit = 'scale-down';
+      if (viewportRect.width > imageRef.value.naturalWidth)
+        zoomVal.value = 100 / zoomFactor;
+      else
+        zoomVal.value = 100;
       break;
   }
+
+  sliderOffsetX.value = 0;
+  updateImagePositionAttribute(0, 0);
+  updateSliderPositionByRatio(sliderRatio.value);
 };
 
 defineExpose({
@@ -296,7 +304,7 @@ defineExpose({
     flex-direction: row;
     position: relative;
     height: 100%;
-    overflow: hidden;;
+    overflow: hidden;
 
     .image {
       position: absolute;
