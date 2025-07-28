@@ -1,6 +1,6 @@
 {
   "name": "vue3-image-compare-slider",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "private": false,
   "scripts": {
