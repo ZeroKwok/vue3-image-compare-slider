@@ -37,10 +37,6 @@ const props = defineProps({
   },
 });
 
-defineExpose({
-  setFitMode,
-})
-
 const emit = defineEmits(['update:zoom'])
 
 const viewportRef = ref(null);
@@ -252,7 +248,23 @@ const handleImageLoad = (isLeft) => {
   updateSliderPositionByRatio(0.5);
 };
 
-var setFitMode = (mode) => {
+const handleResize = () => {
+  if (!viewportRef.value) return;
+  updateSliderPositionByRatio(sliderRatio.value);
+};
+const resizeObserver = new ResizeObserver(handleResize);
+
+onMounted(() => {
+  if (viewportRef.value)
+    resizeObserver.observe(viewportRef.value);
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver)
+    resizeObserver.disconnect();
+});
+
+const setFitMode = (mode) => {
   console.log('setFitMode: ', mode);
 
   const viewportRect = viewportRef.value.getBoundingClientRect();
@@ -284,22 +296,10 @@ var setFitMode = (mode) => {
   updateImagePositionAttribute(0, 0);
   updateSliderPositionByRatio(sliderRatio.value);
 };
+defineExpose({
+  setFitMode,
+})
 
-const handleResize = () => {
-  if (!viewportRef.value) return;
-  updateSliderPositionByRatio(sliderRatio.value);
-};
-const resizeObserver = new ResizeObserver(handleResize);
-
-onMounted(() => {
-  if (viewportRef.value)
-    resizeObserver.observe(viewportRef.value);
-});
-
-onBeforeUnmount(() => {
-  if (resizeObserver)
-    resizeObserver.disconnect();
-});
 </script>
 
 <style scoped lang="scss">

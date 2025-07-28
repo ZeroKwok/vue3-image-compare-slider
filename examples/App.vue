@@ -6,7 +6,7 @@
 
       <div class="controls">
         <el-slider class="zoom" v-model="zoom" :min="zoomRange.min" :max="zoomRange.max" :step="zoomRange.step" :vertical="true" height="80px"
-          :format-tooltip="val => `Zoom: ${val}%`" />
+          :format-tooltip="val => `Zoom: ${val.toFixed(2)}%`" />
 
         <el-dropdown class="fit-mode" @command="mode => imageView.setFitMode(mode)">
           <el-button plain>
