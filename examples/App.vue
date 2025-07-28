@@ -61,7 +61,7 @@ const currentRight = computed(() => getItemImage(currentName.value, '2'));
 const imageView = ref(null);
 const fitMode = ref('contain');
 const zoom = ref(100);
-const zoomRange = {min: 0, max: 400, step: 10};
+const zoomRange = {min: 10, max: 400, step: 10};
 
 </script>
 
