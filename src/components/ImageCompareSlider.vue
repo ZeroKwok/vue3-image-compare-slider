@@ -16,8 +16,7 @@
 
 
 <script setup>
-import { sl } from 'element-plus/es/locales.mjs';
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 
 const props = defineProps({
   left: {
@@ -37,6 +36,10 @@ const props = defineProps({
     default: () => ({ min: 10, max: 400, step: 10 })
   },
 });
+
+defineExpose({
+  setFitMode,
+})
 
 const emit = defineEmits(['update:zoom'])
 
@@ -60,8 +63,6 @@ const zoomVal = ref(props.zoom);
 const zoomMin = ref(props.zoomRange.min);
 const zoomMax = ref(props.zoomRange.max);
 const zoomStep = ref(props.zoomRange.step);
-
-const fitMode = ref('contain');
 
 const clamp = (value, min, max) => {
   return Math.max(min, Math.min(max, value));
@@ -251,7 +252,7 @@ const handleImageLoad = (isLeft) => {
   updateSliderPositionByRatio(0.5);
 };
 
-const setFitMode = (mode) => {
+var setFitMode = (mode) => {
   console.log('setFitMode: ', mode);
 
   const viewportRect = viewportRef.value.getBoundingClientRect();
@@ -284,10 +285,21 @@ const setFitMode = (mode) => {
   updateSliderPositionByRatio(sliderRatio.value);
 };
 
-defineExpose({
-  setFitMode,
-})
+const handleResize = () => {
+  if (!viewportRef.value) return;
+  updateSliderPositionByRatio(sliderRatio.value);
+};
+const resizeObserver = new ResizeObserver(handleResize);
 
+onMounted(() => {
+  if (viewportRef.value)
+    resizeObserver.observe(viewportRef.value);
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver)
+    resizeObserver.disconnect();
+});
 </script>
 
 <style scoped lang="scss">
