@@ -2,7 +2,7 @@
   <div class="container">
     <div class="image-viewer">
       <ImageSliderCompare ref="imageView" :left="currentLeft" :right="currentRight" v-model:zoom="zoom"
-        :zoomRange="zoomRange" :fit="fitMode" />
+        :zoomRange="zoomRange"/>
 
       <div class="controls">
         <el-slider class="zoom" v-model="zoom" :min="zoomRange.min" :max="zoomRange.max" :step="zoomRange.step" :vertical="true" height="80px"
@@ -59,10 +59,8 @@ const currentLeft = computed(() => getItemImage(currentName.value, '1'));
 const currentRight = computed(() => getItemImage(currentName.value, '2'));
 
 const imageView = ref(null);
-const fitMode = ref('contain');
 const zoom = ref(100);
 const zoomRange = {min: 10, max: 400, step: 10};
-
 </script>
 
 <style lang="scss" scoped>
