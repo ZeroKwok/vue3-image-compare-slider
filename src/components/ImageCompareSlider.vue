@@ -155,7 +155,12 @@ const handleDrag = (e) => {
   if (isSliderDragging.value) {
     updateSliderPosition(x - viewportRect.left, viewportRect);
   } else {
-    updateImagePosition(x - viewportRect.left, y - viewportRect.top, viewportRect);
+    const imageRect = leftRef.value.getBoundingClientRect();
+    const ph = clamp(imageRect.width, 10, 60);
+    const pv = clamp(imageRect.height, 10, 60);
+    const ox = clamp(x - viewportRect.left, ph, viewportRect.width - ph);
+    const oy = clamp(y - viewportRect.top,  pv, viewportRect.height - pv);
+    updateImagePosition(ox, oy, viewportRect);
   }
 };
 
