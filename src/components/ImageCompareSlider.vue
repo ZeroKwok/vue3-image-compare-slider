@@ -47,7 +47,6 @@ let imageRef = ref(null);
 
 const sliderPosition = ref(0);
 const sliderRatio = ref(0);
-const sliderOffsetX = ref(0);
 
 const clickOffsetX = ref(0);
 const clickOffsetY = ref(0);
@@ -89,7 +88,6 @@ const handleWheel = (e) => {
 
   // 应用更新
   zoomVal.value = newZoom;
-  sliderOffsetX.value = newX;
   updateImagePositionAttribute(newX, newY);
   updateSliderPositionByRatio(sliderRatio.value);
 };
@@ -165,12 +163,14 @@ const handleDrag = (e) => {
 };
 
 const updateSliderPosition = (x, rect) => {
+  const imageRect = leftRef.value.getBoundingClientRect();
+  const left = imageRect.left - rect.left;
   const zoom = zoomVal.value / 100;
   const vW = rect.width;          // viewport width
   const sX = clamp(x, 0, vW);     // slider x
   const sRatio = sX / vW;         // slider x ratio
 
-  const offX = -sliderOffsetX.value;
+  const offX = -left;
   const iX = (sX + offX) / zoom;  // slider x on image
 
   sliderRatio.value = sRatio;
@@ -210,7 +210,6 @@ const updateImagePosition = (x, y, rect) => {
   let iX = x - clickOffsetX.value;
   let iY = y - clickOffsetY.value;
 
-  sliderOffsetX.value = iX;
   updateImagePositionAttribute(iX, iY);
   updateSliderPositionByRatio(sliderRatio.value);
 }
@@ -259,7 +258,6 @@ const handleImageLoad = (isLeft) => {
     imageRef = rightRef;
 
   zoomVal.value = 100;
-  sliderOffsetX.value = 0;
   updateImagePositionAttribute(0, 0);
   updateSliderPositionByRatio(0.5);
 };
@@ -308,7 +306,6 @@ const setFitMode = (mode) => {
       break;
   }
 
-  sliderOffsetX.value = 0;
   updateImagePositionAttribute(0, 0);
   updateSliderPositionByRatio(sliderRatio.value);
 };
