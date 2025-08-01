@@ -167,7 +167,6 @@ const handleDrag = (e) => {
 const updateSliderPosition = (x, rect) => {
   const zoom = zoomVal.value / 100;
   const vW = rect.width;          // viewport width
-  const iW = vW * zoom;           // image width
   const sX = clamp(x, 0, vW);     // slider x
   const sRatio = sX / vW;         // slider x ratio
 
@@ -177,10 +176,6 @@ const updateSliderPosition = (x, rect) => {
   sliderRatio.value = sRatio;
   sliderPosition.value = sX;
   updateImageClipPath(iX);
-
-  console.log(
-    `update: x: ${x}, rect: ${rect.left}~${rect.right}:${vW}, zoom: ${zoom}, iW: ${iW}, ` +
-    `sRatio: ${sRatio}, sX: ${sX}, iX: ${iX}, offX: ${offX}`);
 };
 
 const updateSliderPositionByRatio = (sRatio) => {
@@ -206,7 +201,6 @@ const initImagePositionOffset = (e) => {
 };
 
 const updateImagePosition = (x, y, rect) => {
-  const imgRect = leftRef.value.getBoundingClientRect(); // 实际图片尺寸(包含缩放后)
   const zoom = zoomVal.value / 100;
   const vW = rect.width;                          // 视口尺寸
   const vH = rect.height;
@@ -219,12 +213,6 @@ const updateImagePosition = (x, y, rect) => {
   sliderOffsetX.value = iX;
   updateImagePositionAttribute(iX, iY);
   updateSliderPositionByRatio(sliderRatio.value);
-
-  console.log(
-    `update: pox: ${x},${y}, rect: ${rect.left}~${rect.right}:${rect.top}~${rect.bottom}, ` +
-    `zoom: ${zoom}, view: ${vW}x${vH}, image: ${iW}x${iH}, ` +
-    `ox: ${clickOffsetX.value}, oy: ${clickOffsetY.value}, ofx: ${offX}, ofy: ${offY}, ` +
-    `ix: ${iX}, iy: ${iY}`);
 }
 
 const updateImageClipPath = (pos) => {
