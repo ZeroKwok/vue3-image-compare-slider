@@ -76,12 +76,11 @@ const handleWheel = (e) => {
 
 watch(zoomVal, (newZoom) => {
   emit('update:zoom', newZoom);
-  updateImageScale(newZoom / 100);
-  updateSliderPositionByRatio(sliderRatio.value);
 });
 
 watch(() => props.zoom, (newZoom) => {
-  updateZoom(newZoom);
+  if (newZoom != zoomVal.value)
+    updateZoom(newZoom);
 });
 
 const getPos = (e) => {
@@ -202,7 +201,7 @@ const updateZoom = (newZoom, originX = null, originY = null) => {
   const left = imageRect.left - viewportRect.left;
   const top = imageRect.top - viewportRect.top
 
-  const mouseXInViewport = originX || (viewportRef.width / 2);
+  const mouseXInViewport = originX || (viewportRect.width / 2);
   const mouseYInViewport = originY || (viewportRect.height / 2);
 
   const oldZoom = zoomVal.value;
@@ -219,6 +218,7 @@ const updateZoom = (newZoom, originX = null, originY = null) => {
 
   // 应用更新
   zoomVal.value = newZoom;
+  updateImageScale(newZoom / 100);
   updateImagePositionAttribute(newX, newY);
   updateSliderPositionByRatio(sliderRatio.value);
 }
@@ -317,8 +317,6 @@ const setFitMode = (mode) => {
   }
 
   updateZoom(newZoom);
-  updateImagePositionAttribute(0, 0);
-  updateSliderPositionByRatio(sliderRatio.value);
 };
 
 defineExpose({
