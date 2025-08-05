@@ -66,30 +66,12 @@ const clamp = (value, min, max) => {
 const handleWheel = (e) => {
   e.preventDefault();
 
-  const imageRect = leftRef.value.getBoundingClientRect();
   const viewportRect = viewportRef.value.getBoundingClientRect();
   const mouseXInViewport = e.clientX - viewportRect.left;
   const mouseYInViewport = e.clientY - viewportRect.top;
-  const left = imageRect.left - viewportRect.left;
-  const top = imageRect.top - viewportRect.top
-
-  const oldZoom = zoomVal.value;
   const newZoom = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value : -zoomStep.value), zoomMin.value, zoomMax.value);
-  const scaleChange = newZoom / oldZoom;
 
-  // 计算新位置，使鼠标指向的点保持不变
-  // 1. 鼠标位置相对于图片的坐标 换算到 此次缩放后 该点距离左上角的长度
-  // 2. 该鼠标到图片左上角的长度 减去 鼠标到视口的左上角的长度, 即可得出图片相对于视口的偏移量
-  // 3. 由于最后我们需要负的偏移量, 因此交换双方使符号取反 
-  const mouseXInImage = mouseXInViewport - left;
-  const mouseYInImage = mouseYInViewport - top;
-  const newX = mouseXInViewport - (mouseXInImage * scaleChange);
-  const newY = mouseYInViewport - (mouseYInImage * scaleChange);
-
-  // 应用更新
-  zoomVal.value = newZoom;
-  updateImagePositionAttribute(newX, newY);
-  updateSliderPositionByRatio(sliderRatio.value);
+  updateZoom(newZoom, mouseXInViewport, mouseYInViewport);
 };
 
 watch(zoomVal, (newZoom) => {
@@ -98,8 +80,8 @@ watch(zoomVal, (newZoom) => {
   updateSliderPositionByRatio(sliderRatio.value);
 });
 
-watch(() => props.zoom, (newVal) => {
-  zoomVal.value = newVal;
+watch(() => props.zoom, (newZoom) => {
+  updateZoom(newZoom);
 });
 
 const getPos = (e) => {
@@ -214,6 +196,33 @@ const updateImagePosition = (x, y, rect) => {
   updateSliderPositionByRatio(sliderRatio.value);
 }
 
+const updateZoom = (newZoom, originX = null, originY = null) => {
+  const imageRect = leftRef.value.getBoundingClientRect();
+  const viewportRect = viewportRef.value.getBoundingClientRect();
+  const left = imageRect.left - viewportRect.left;
+  const top = imageRect.top - viewportRect.top
+
+  const mouseXInViewport = originX || (viewportRef.width / 2);
+  const mouseYInViewport = originY || (viewportRect.height / 2);
+
+  const oldZoom = zoomVal.value;
+  const scaleChange = newZoom / oldZoom;
+
+  // 计算新位置，使鼠标指向的点保持不变
+  // 1. 鼠标位置相对于图片的坐标 换算到 此次缩放后 该点距离左上角的长度
+  // 2. 该鼠标到图片左上角的长度 减去 鼠标到视口的左上角的长度, 即可得出图片相对于视口的偏移量
+  // 3. 由于最后我们需要负的偏移量, 因此交换双方使符号取反 
+  const mouseXInImage = mouseXInViewport - left;
+  const mouseYInImage = mouseYInViewport - top;
+  const newX = mouseXInViewport - (mouseXInImage * scaleChange);
+  const newY = mouseYInViewport - (mouseYInImage * scaleChange);
+
+  // 应用更新
+  zoomVal.value = newZoom;
+  updateImagePositionAttribute(newX, newY);
+  updateSliderPositionByRatio(sliderRatio.value);
+}
+
 const updateImageClipPath = (pos) => {
   leftRef.value.style.clipPath = `inset(0 calc(100% - ${pos}px) 0 0)`;
   rightRef.value.style.clipPath = `inset(0 0 0 ${pos}px)`;
@@ -289,23 +298,25 @@ const setFitMode = (mode) => {
   const vusualSize = getSizeByContain(imageSize, viewportRef.value.getBoundingClientRect());
   const zoomFactor = vusualSize.width / imageSize.width;
 
+  let newZoom;
   switch (mode) {
     case '1:1':
-      zoomVal.value = 100 / zoomFactor;
+      newZoom = 100 / zoomFactor;
       break;
 
     case 'contain':
-      zoomVal.value = 100;
+      newZoom = 100;
       break;
 
     case 'scale-down':
       if (viewportRect.width > imageRef.value.naturalWidth)
-        zoomVal.value = 100 / zoomFactor;
+        newZoom = 100 / zoomFactor;
       else
-        zoomVal.value = 100;
+        newZoom = 100;
       break;
   }
 
+  updateZoom(newZoom);
   updateImagePositionAttribute(0, 0);
   updateSliderPositionByRatio(sliderRatio.value);
 };
