@@ -182,16 +182,7 @@ const initImagePositionOffset = (e) => {
 };
 
 const updateImagePosition = (x, y, rect) => {
-  const zoom = zoomVal.value / 100;
-  const vW = rect.width;                          // 视口尺寸
-  const vH = rect.height;
-  const iW = leftRef.value.width * zoom;          // 图片尺寸(缩放后), contain 模式下, width 和 height 与视口相同
-  const iH = leftRef.value.height * zoom;
-
-  let iX = x - clickOffsetX.value;
-  let iY = y - clickOffsetY.value;
-
-  updateImagePositionAttribute(iX, iY);
+  updateImagePositionAttribute(x - clickOffsetX.value, y - clickOffsetY.value);
   updateSliderPositionByRatio(sliderRatio.value);
 }
 
@@ -345,9 +336,6 @@ defineExpose({
       position: absolute;
       left: 0;
       top: 0;
-
-      // top: 50%;
-      // transform: translate(0, -50%);
 
       /* 图像跟随父窗口缩放 */
       width: 100%;
