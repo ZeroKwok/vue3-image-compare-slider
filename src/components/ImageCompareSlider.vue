@@ -278,8 +278,8 @@ onBeforeUnmount(() => {
     resizeObserver.disconnect();
 });
 
-const setFitMode = (mode) => {
-  console.log('setFitMode: ', mode);
+const updateFitMode = (mode) => {
+  console.log('updateFitMode: ', mode);
 
   const viewportRect = viewportRef.value.getBoundingClientRect();
   const imageSize = {
@@ -311,7 +311,7 @@ const setFitMode = (mode) => {
 };
 
 defineExpose({
-  setFitMode,
+  updateFitMode: updateFitMode,
 })
 
 </script>

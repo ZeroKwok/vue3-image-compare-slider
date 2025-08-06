@@ -8,7 +8,7 @@
         <el-slider class="zoom" v-model="zoom" :min="zoomRange.min" :max="zoomRange.max" :step="zoomRange.step" :vertical="true" height="80px"
           :format-tooltip="val => `Zoom: ${val.toFixed(2)}%`" />
 
-        <el-dropdown class="fit-mode" @command="mode => imageView.setFitMode(mode)">
+        <el-dropdown class="fit-mode" @command="mode => imageView.updateFitMode(mode)">
           <el-button plain>
             <el-icon>
               <FullScreen />
