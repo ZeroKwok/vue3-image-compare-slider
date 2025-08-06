@@ -233,13 +233,8 @@ const updateImagePositionAttribute = (x, y) => {
   rightRef.value.style.top = leftRef.value.style.top;
 };
 
-// 重置图像属性
-const clearImageAttribute = (imgRef) => {
-  imgRef.value.loaded = false;
-};
-watch(() => props.left, (val) => { clearImageAttribute(leftRef); });
-watch(() => props.right, (val) => { clearImageAttribute(rightRef); });
-
+watch(() => props.left, (val) => leftRef.value.loaded = false );
+watch(() => props.right, (val) => rightRef.value.loaded = false );
 const handleImageLoad = (isLeft) => {
   if (!leftRef.value || !rightRef.value) return;
   if (isLeft)
