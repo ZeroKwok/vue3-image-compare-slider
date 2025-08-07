@@ -302,7 +302,15 @@ const updateFitMode = (mode) => {
       break;
   }
 
+  const scale = newZoom / 100;
+  const imageWidth = imageRef.value.width * scale;
+  const imageHeight = imageRef.value.height * scale;
+  const x = (viewportRect.width - imageWidth) / 2;
+  const y = (viewportRect.height - imageHeight) / 2;
+
   updateZoom(newZoom);
+  updateImagePositionAttribute(x, y);
+  updateSliderPositionByRatio(sliderRatio.value);
 };
 
 defineExpose({
