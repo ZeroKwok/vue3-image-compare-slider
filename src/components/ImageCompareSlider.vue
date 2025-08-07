@@ -252,9 +252,8 @@ const handleImageLoad = (isLeft) => {
   if (leftArea < rightArea)
     imageRef = rightRef;
 
-  zoomVal.value = 100;
-  updateImagePositionAttribute(0, 0);
-  updateSliderPositionByRatio(0.5);
+  sliderRatio.value = 0.5;
+  updateFitMode('contain');
 };
 
 const handleResize = () => {
