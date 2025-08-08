@@ -164,8 +164,8 @@ const handleDrag = (e) => {
     updateSliderPosition(x - viewportRect.left, viewportRect);
   } else {
     const imageRect = leftRef.value.getBoundingClientRect();
-    const ph = clamp(imageRect.width, 10, 60);
-    const pv = clamp(imageRect.height, 10, 60);
+    const ph = clamp(imageRect.width * 0.3, 10, 60);
+    const pv = clamp(imageRect.height * 0.3, 10, 60);
     const ox = clamp(x - viewportRect.left, ph, viewportRect.width - ph);
     const oy = clamp(y - viewportRect.top,  pv, viewportRect.height - pv);
     updateImagePosition(ox, oy, viewportRect);
