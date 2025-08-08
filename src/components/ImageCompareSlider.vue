@@ -188,19 +188,19 @@ const updateImagePosition = (x, y, rect) => {
 
 const updateZoom = (newZoom, origin = null, updatePosition = true) => {
   const oldZoom = zoomVal.value;
+  const imageRect = leftRef.value.getBoundingClientRect();
 
   zoomVal.value = newZoom;
   updateImageScale(newZoom / 100);
 
   if (updatePosition) {
-    const imageRect = leftRef.value.getBoundingClientRect();
     const viewportRect = viewportRef.value.getBoundingClientRect();
     const left = imageRect.left - viewportRect.left;
     const top = imageRect.top - viewportRect.top
 
-    const mouseXInViewport = origin?.x || (viewportRect.width / 2);
-    const mouseYInViewport = origin?.y || (viewportRect.height / 2);
-
+    // 默认缩放中心位于图片中心
+    const mouseXInViewport = origin?.x || (left + imageRect.width / 2);
+    const mouseYInViewport = origin?.y || (top + imageRect.height / 2);
     const scaleChange = newZoom / oldZoom;
 
     // 计算新位置，使鼠标指向的点保持不变
