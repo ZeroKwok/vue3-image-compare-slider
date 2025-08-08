@@ -63,15 +63,44 @@ const clamp = (value, min, max) => {
   return Math.max(min, Math.min(max, value));
 };
 
+const isContains = (x,y, rect) => {
+  return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+};
+
+const getSizeByContain = (size, containerSize, scale = 1) => {
+  const ratio = Math.min(containerSize.width / size.width, containerSize.height / size.height);
+  return {
+    width: size.width * ratio * scale,
+    height: size.height * ratio * scale,
+  };
+};
+
 const handleWheel = (e) => {
   e.preventDefault();
 
+  const imageRect = imageRef.value.getBoundingClientRect();
   const viewportRect = viewportRef.value.getBoundingClientRect();
-  const mouseXInViewport = e.clientX - viewportRect.left;
-  const mouseYInViewport = e.clientY - viewportRect.top;
   const newZoom = clamp(zoomVal.value + (e.deltaY < 0 ? zoomStep.value : -zoomStep.value), zoomMin.value, zoomMax.value);
+  
+  // 如果鼠标位于图像中, 则以鼠标位置作为缩放中心点, 否则以图像中心缩放
+  const imageSize = {
+    width: imageRef.value.naturalWidth,
+    height: imageRef.value.naturalHeight
+  };
+  const visualSize = getSizeByContain(imageSize, imageRect);
+  const visualPaddingLeft = (imageRect.width - visualSize.width) / 2;
+  const visualPaddingTop = (imageRect.height - visualSize.height) / 2;
+  const visualRect = new DOMRect(imageRect.left + visualPaddingLeft, imageRect.top + visualPaddingTop, visualSize.width, visualSize.height);
 
-  updateZoom(newZoom, {x: mouseXInViewport, y: mouseYInViewport});
+  if (isContains(e.clientX, e.clientY, visualRect)) {
+    // 计算鼠标在视口中的位置, 作为缩放中心
+    const mouseXInViewport = e.clientX - viewportRect.left;
+    const mouseYInViewport = e.clientY - viewportRect.top;
+    updateZoom(newZoom, { x: mouseXInViewport, y: mouseYInViewport });
+  }
+  else {
+    updateZoom(newZoom);
+  }
 };
 
 watch(zoomVal, (newZoom) => {
@@ -162,14 +191,6 @@ const updateSliderPosition = (x, rect) => {
 const updateSliderPositionByRatio = (sRatio) => {
   const rect = viewportRef.value.getBoundingClientRect();
   updateSliderPosition(rect.width * sRatio, rect);
-};
-
-const getSizeByContain = (size, containerSize) => {
-  const ratio = Math.min(containerSize.width / size.width, containerSize.height / size.height);
-  return {
-    width: size.width * ratio,
-    height: size.height * ratio
-  };
 };
 
 const initImagePositionOffset = (e) => {
@@ -283,8 +304,8 @@ const updateFitMode = (mode) => {
     width: imageRef.value.naturalWidth,
     height: imageRef.value.naturalHeight
   };
-  const vusualSize = getSizeByContain(imageSize, viewportRef.value.getBoundingClientRect());
-  const zoomFactor = vusualSize.width / imageSize.width;
+  const visualSize = getSizeByContain(imageSize, viewportRef.value.getBoundingClientRect());
+  const zoomFactor = visualSize.width / imageSize.width;
 
   let newZoom;
   switch (mode) {
