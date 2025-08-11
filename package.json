@@ -1,6 +1,6 @@
 {
   "name": "vue3-image-compare-slider",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "index.js",
   "private": false,
   "scripts": {
@@ -13,7 +13,7 @@
     "email": "zero.kwok@foxmail.com"
   },
   "license": "MIT",
-  "description": "A simple image compare slider component for Vue 3.",
+  "description": "A simple image compare slider component for Vue 3, supporting zooming, dragging and fit modes.",
   "dependencies": {
     "element-plus": "^2.10.4",
     "vue": "^3.5.18"
