@@ -44,17 +44,17 @@ import ImageSliderCompare from "vue3-image-compare-slider";
 const examples = [
   'portrait-265',
   'bigger',
-  'dark tone',
+  'dark-tone',
   'bit',
   'colour',
   'different',
-  'look like 1',
-  'look like 2',
-  'look like 3',
+  'look-like-1',
+  'look-like-2',
+  'look-like-3',
 ];
 const currentName = ref(examples[0]);
 
-const getItemImage = (name, label = '1') => `./public/${name}/${label}.jpg`;
+const getItemImage = (name, label = '1') => `/images/${name}/${label}.jpg`;
 const currentLeft = computed(() => getItemImage(currentName.value, '1'));
 const currentRight = computed(() => getItemImage(currentName.value, '2'));
 

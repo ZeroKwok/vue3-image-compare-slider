@@ -5,8 +5,8 @@
   "private": false,
   "scripts": {
     "dev": "vite serve examples",
-    "dev:preview": "vite preview examples",
-    "build": "vite build"
+    "build": "vite build",
+    "preview": "vite build examples && vite preview examples"
   },
   "author": {
     "name": "zero",
