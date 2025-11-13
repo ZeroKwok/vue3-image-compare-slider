@@ -2,6 +2,8 @@
 
 A simple image compare slider component for Vue 3, supporting zooming, dragging and fit modes.  
 
+[Online Demo](https://zerokwok.github.io/vue3-image-compare-slider/index.html)
+
 ## Features  
 
 - Supports zooming, dragging, and slider position adjustment  
@@ -76,8 +78,13 @@ Callable via `ref`:
 
 ## Example  
 
-View the complete example in [examples/App.vue](examples/App.vue).  
+View the complete example in [examples/App.vue](examples/App.vue) or [online demo](https://zerokwok.github.io/vue3-image-compare-slider/index.html).  
 
 ## Preview  
 
-Run the example
+Run the example:
+
+```bash
+cd vue3-image-compare-slider
+yarn && yarn dev
+```
