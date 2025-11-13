@@ -54,7 +54,12 @@ const examples = [
 ];
 const currentName = ref(examples[0]);
 
-const getItemImage = (name, label = '1') => `/images/${name}/${label}.jpg`;
+const getItemImage = (name, label = '1') => {
+  if (import.meta.env.BASE_URL !== '/')
+    return `${import.meta.env.BASE_URL}/images/${name}/${label}.jpg`;
+  else
+    return `/images/${name}/${label}.jpg`;
+}
 const currentLeft = computed(() => getItemImage(currentName.value, '1'));
 const currentRight = computed(() => getItemImage(currentName.value, '2'));
 

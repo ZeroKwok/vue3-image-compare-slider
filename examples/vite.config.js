@@ -7,8 +7,10 @@ export default defineConfig({
   plugins: [
     vue(),
   ],
+  // base: '/vue3-image-compare-slider/', // github pages
   build: {
     sourcemap: true,
+    outDir: '../github-page',
   },
   resolve: {
     alias: {
