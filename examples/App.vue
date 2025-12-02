@@ -2,19 +2,27 @@
   <div class="container">
     <div class="sidebar" :class="{ 'collapsed': sidebarCollapsed }"
       :style="{ width: sidebarCollapsed ? '0px' : sidebarWidth + 'px' }" ref="sidebarRef">
-      <div class="sidebar-handle" @mousedown="sidebarStartResize" :class="{ 'collapsed': sidebarCollapsed }"
-        @click="sidebarToggle">
+      <div class="sidebar-handle" :class="{ 'collapsed': sidebarCollapsed }">
+        <div class="sidebar-resize" @mousedown="sidebarStartResize"></div>
+        <div class="sidebar-toggle" @mousedown="null" @click="sidebarToggle">
+          {{ sidebarCollapsed ? '▶' : '◀' }}
+        </div>
       </div>
 
       <div class="sidebar-content">
         <div class="image-list">
-          <div v-for="name in examples" :key="name" class="item" :class="{ active: name === currentName }"
-            @click="currentName = name">
-            <img :src="getItemImage(name, '2')" :alt="name" />
-            <span class="name">{{ name }}</span>
+          <div v-for="(row, rowIndex) in imageData" :key="rowIndex" class="row">
+            <div v-for="(item, colIndex) in row" :key="colIndex" class="item"
+              :class="{ active: itemIndexEquals(currentItemIndex, itemIdexMake(rowIndex, colIndex)) }"
+              @mouseenter="hoveredItem = itemIdexMake(rowIndex, colIndex)" @mouseleave="hoveredItem = null"
+              @click="currentItemIndex = itemIdexMake(rowIndex, colIndex)">
+              <img class="image" :src="getItemImage(item)" :alt="item?.label || item.file" />
+              <span class="label">{{ item.label || item.file }}</span>
+            </div>
           </div>
         </div>
       </div>
+
     </div>
 
     <div class="image-viewer">
@@ -47,13 +55,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import ImageSliderCompare from "vue3-image-compare-slider";
 
 // 侧边栏
-const sidebarWidth = ref(250)
-const sidebarMinWidth = 150
-const sidebarMaxWidth = 400
+const sidebarWidth = ref(320)
+const sidebarMinWidth = 100
+const sidebarMaxWidth = 550
 const sidebarCollapsed = ref(false)
 
 const sidebarStartResize = (e) => {
@@ -87,33 +95,115 @@ const sidebarToggle = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
-const examples = [
-  'portrait-265',
-  'bigger',
-  'dark-tone',
-  'bit',
-  'colour',
-  'different',
-  'look-like-1',
-  'look-like-2',
-  'look-like-3',
-];
-const currentName = ref(examples[0]);
-
-const getItemImage = (name, label = '1') => {
-  if (import.meta.env.BASE_URL !== '/')
-    return `${import.meta.env.BASE_URL}/images/${name}/${label}.jpg`;
-  else
-    return `/images/${name}/${label}.jpg`;
+// 图片列表
+const itemIdexMake = (r, c) => {
+  return { row: r, col: c };
 }
-const currentLeft = computed(() => getItemImage(currentName.value, '1'));
-const currentRight = computed(() => getItemImage(currentName.value, '2'));
 
+const itemIndexEquals = (a, b) => {
+  return a && b && a.row === b.row && a.col === b.col;
+}
+
+const getItemData = (itemIndex) => {
+  if (!itemIndex) return null;
+  return imageData.value[itemIndex.row][itemIndex.col];
+}
+
+const getItemImage = (item) => {
+  if (!item) return null;
+  if (import.meta.env.BASE_URL !== '/')
+    return `${import.meta.env.BASE_URL}/images/${item.file}`;
+  return `/images/${item.file}`;
+}
+
+const currentItemIndex = ref(itemIdexMake(0, 0));
+const hoveredItem = ref(null);
+
+// 示例数据
+const defaultData = [
+  [
+    {
+      "label": "origin",
+      "file": "grayscale/1.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": -1,
+      "details": "这是一张美丽的风景照片，拍摄于海边。\n照片包含蓝天、白云和大海。"
+    },
+    {
+      "label": "Flux 1",
+      "file": "grayscale/2.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": -1,
+      "elapsedTime": 1.5
+    },
+    {
+      "label": "GPT ",
+      "file": "grayscale/3.jpg",
+      "width": 4032,
+      "height": 3024,
+      "elapsedTime": 23.5,
+      "details": "美化, 上色。"
+    },
+  ],
+  [
+    {
+      "label": "origin",
+      "file": "darksome/1.jpg",
+      "width": 1200,
+      "height": 900,
+      "details": "这是一张暗色系照片，拍摄于夜空。"
+    },
+    {
+      "label": "Flux 1",
+      "file": "darksome/2.jpg",
+      "width": 1200,
+      "height": 900,
+      "elapsedTime": 7.5
+    }
+  ],
+  [
+    {
+      "label": "origin",
+      "file": "colour/1.jpg",
+      "width": 1024,
+      "height": 576,
+      "details": ""
+    },
+    {
+      "label": "Flux 1",
+      "file": "colour/2.jpg",
+      "width": 1024,
+      "height": 576,
+      "elapsedTime": 7.5
+    }
+  ]
+];
+
+// 尝试加载数据
+const loadData = ref(null);
+onMounted(async () => {
+  try {
+    const file = await fetch("data.json");
+    loadData.value = await file.json();
+  }
+  catch (e) {
+    console.warn(`load the data.js failed, `, e);
+  }
+});
+
+// 处理数据 - 如果没有传入数据，使用示例数据
+const imageData = computed(() => {
+  return loadData.value ? loadData.value : defaultData
+})
+
+// 视图
+const currentLeft = computed(() => getItemImage(getItemData({ row: currentItemIndex.value.row, col: 0 })));
+const currentRight = computed(() => getItemImage(getItemData(currentItemIndex.value)));
 const imageView = ref(null);
 const zoom = ref(100);
 const zoomRange = { min: 10, max: 400, step: 10 };
-
-
 </script>
 
 <style lang="scss" scoped>
@@ -124,16 +214,17 @@ const zoomRange = { min: 10, max: 400, step: 10 };
 
   display: flex;
   flex-direction: row;
-  padding: 1rem;
-  gap: 1.5rem;
+  gap: 0.2rem;
 
   .sidebar {
     position: relative;
+
     &.collapsed .sidebar-content {
       display: none;
     }
 
     .sidebar-handle {
+      z-index: 10;
       position: absolute;
       top: 0px;
       right: -4px;
@@ -141,55 +232,93 @@ const zoomRange = { min: 10, max: 400, step: 10 };
       height: 100%;
       background-color: #ddd8;
       transition: background-color 0.2s;
-      cursor: ew-resize;
 
       &.collapsed {
         background-color: transparent;
       }
 
-      &:hover { 
+      &:hover {
         background-color: #ccca;
+      }
+
+      .sidebar-resize {
+        width: 100%;
+        height: 100%;
+        cursor: ew-resize;
+      }
+
+      .sidebar-toggle {
+        position: absolute;
+        top: 50%;
+        left: 4px;
+        transform: translateY(-50%);
+        height: 60px;
+        border: 1px solid #888;
+        border-radius: 4px;
+        align-content: center;
+        cursor: pointer;
+
+        background-color: #ddd8;
+        color: #888;
+
+        &hover {
+          background-color: #ccca;
+        }
       }
     }
 
+    .sidebar-content {
+      height: 100%;
+    }
+
     .image-list {
+      height: 100%;
       border: 1px solid #ccc;
       padding: 3px 3px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      overflow: auto;
 
-      .item {
+      .row {
+        gap: 0.2rem;
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        padding: 0.5rem;
+        flex-wrap: nowrap;
+        min-width: min-content;
 
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
+        .item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          padding: 0.2rem;
+          width: 100px;
 
-        &.active {
-          background-color: #e0f7fa;
-          box-shadow: 0 0 0 2px #000;
-        }
+          &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+          }
 
-        img {
-          width: 100%;
-          aspect-ratio: 1;
-          object-fit: cover;
-          border-radius: 4px;
-        }
+          &.active {
+            background-color: #e0f7fa;
+            box-shadow: 0 0 0 2px #000;
+          }
 
-        .name {
-          margin-top: 0.5rem;
-          font-size: 0.8rem;
-          color: #424242;
-          text-align: center;
-          word-break: break-word;
+          img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+
+          .label {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #424242;
+            text-align: center;
+            word-break: break-word;
+          }
         }
       }
     }
