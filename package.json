@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite serve examples",
     "build": "vite build",
-    "preview": "vite build examples && vite preview examples"
+    "preview": "vite build examples && vite preview examples",
+    "tools:dev": "vite serve tools",
+    "tools:build": "vite build tools",
+    "tools:preview": "vite preview tools --outDir templet"
   },
   "author": {
     "name": "zero",

@@ -63,7 +63,6 @@
               </div>
             </div>
         </div>
-
       </div>
 
     </div>
@@ -347,129 +346,130 @@ const zoomRange = { min: 10, max: 400, step: 10 };
 
     .sidebar-content {
       height: 100%;
-    }
-
-    .sidebar-controls {
-      padding: 0.5rem;
-      .hide-first {
-        cursor: pointer;
-        display: flex;
-        gap: 0.2rem;
-      }
-    }
-
-    .image-list {
-      height: 100%;
-      padding: 3px 3px;
       display: flex;
       flex-direction: column;
-      overflow: auto;
-
-      .row {
-        gap: 0.2rem;
-        display: flex;
-        flex-wrap: nowrap;
-        min-width: min-content;
-
-        .item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+    
+      .sidebar-controls {
+        padding: 0.5rem;
+        .hide-first {
           cursor: pointer;
-          transition: all 0.2s ease;
-          padding: 0.2rem;
-          width: 100px;
+          display: flex;
+          gap: 0.2rem;
+        }
+      }
 
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-          }
+      .image-list {
+        padding: 3px 3px;
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
 
-          &.firsts {
-            cursor: default;
-            opacity: 0.9;
-            border-right: 2px solid #888;
-          }
+        .row {
+          gap: 0.2rem;
+          display: flex;
+          flex-wrap: nowrap;
+          min-width: min-content;
 
-          &.firsts:hover {
-            transform: none;
-            box-shadow: none;
-          }
+          .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0.2rem;
+            width: 100px;
 
-          &.firsts.active {
-            background-color: inherit;
-            box-shadow: none;
-          }
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            }
 
-          &.hiden {
-            display: none;
-          }
+            &.firsts {
+              cursor: default;
+              opacity: 0.9;
+              border-right: 2px solid #888;
+            }
 
-          &.active {
-            background-color: #e0f7fa;
-            box-shadow: 0 0 0 2px #000;
-          }
+            &.firsts:hover {
+              transform: none;
+              box-shadow: none;
+            }
 
-          img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 4px;
-          }
+            &.firsts.active {
+              background-color: inherit;
+              box-shadow: none;
+            }
 
-          .label {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: #424242;
-            text-align: center;
-            word-break: break-word;
+            &.hiden {
+              display: none;
+            }
+
+            &.active {
+              background-color: #e0f7fa;
+              box-shadow: 0 0 0 2px #000;
+            }
+
+            img {
+              width: 100%;
+              aspect-ratio: 1;
+              object-fit: cover;
+              border-radius: 4px;
+            }
+
+            .label {
+              margin-top: 0.5rem;
+              font-size: 0.8rem;
+              color: #424242;
+              text-align: center;
+              word-break: break-word;
+            }
           }
         }
       }
-    }
 
-    .image-detail {
-      z-index: 20;
+      .image-detail {
+        z-index: 20;
 
-      position: absolute;
-      top: 100px;
-      right: -500px;
-      width: 500px;
+        position: absolute;
+        top: 100px;
+        right: -500px;
+        width: 500px;
 
-      background: #ffff;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        background: #ffff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 
-      padding: 1rem;
+        padding: 1rem;
 
-      .content {
-          display: flex;
-          gap: 0.5rem;
-          padding-top: 0.2rem;
-
-          .preview {
-            flex: 1;
-            width: 50%;
-          }
-
-          .fields {
+        .content {
             display: flex;
-            flex-direction: column;
             gap: 0.5rem;
+            padding-top: 0.2rem;
 
-            .detail-row {
+            .preview {
+              flex: 1;
+              width: 50%;
+            }
+
+            .fields {
               display: flex;
+              flex-direction: column;
               gap: 0.5rem;
-              .label {
-                font-weight: 600;
-                flex-shrink: 0;
-              }
-              .value {
-                flex: 1;
+
+              .detail-row {
+                display: flex;
+                gap: 0.5rem;
+                .label {
+                  font-weight: 600;
+                  flex-shrink: 0;
+                }
+                .value {
+                  flex: 1;
+                }
               }
             }
-          }
+        }
       }
     }
   }

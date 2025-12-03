@@ -10,7 +10,7 @@ export default defineConfig({
   publicDir: '../examples/public',
   build: {
     sourcemap: true,
-    outDir: '../github-page',
+    outDir: 'templet',
   },
   resolve: {
     alias: {
