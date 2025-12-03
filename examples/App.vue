@@ -23,12 +23,47 @@
                 active: itemIndexEquals(currentItemIndex, itemIdexMake(rowIndex, colIndex)), 
                 firsts: colIndex === 0,
                 hiden: hideFirstColumn && colIndex === 0 }"
-              @click="itemClicked(rowIndex, colIndex)">
+              @click="itemClicked(rowIndex, colIndex)"
+              @mouseenter="itemMouseEnter(rowIndex, colIndex, $event)"
+              @mouseleave="itemMouseLeave(rowIndex, colIndex)">
               <img class="image" :src="getItemImage(item)" :alt="item?.label || item.file" />
-              <span class="label">{{ item.label || item.file }}</span>
+              <span v-if="colIndex === 0" class="label">{{ item?.label || item.file }}</span>
+              <span v-else class="label">{{ item?.label || item.file }} ({{ item?.elapsedTime || ''}})</span>
             </div>
           </div>
         </div>
+        
+        <!-- 提示信息 -->
+        <div class="image-detail" v-if="hoverItem">
+            <h3>{{ hoverItem?.label || '未知' }}</h3>
+
+            <div class="content">
+              <img class="preview" :src="getItemImage(hoverItem)"/>
+              <div class="fields">
+                  <div class="detail-row">
+                      <span class="label">文件:</span>
+                      <span class="value">{{ hoverItem.file }}</span>
+                  </div>
+                  <div class="detail-row">
+                      <span class="label">尺寸:</span>
+                      <span class="value">{{ hoverItem.width }} × {{ hoverItem.height }} 像素</span>
+                  </div>
+                  <div class="detail-row">
+                      <span class="label">大小:</span>
+                      <span class="value">{{ formatBytes(hoverItem?.bytes || -1) }}</span>
+                  </div>
+                  <div v-if="hoverItem.elapsedTime" class="detail-row">
+                      <span class="label">处理时间:</span>
+                      <span class="value">{{ hoverItem.elapsedTime }} 秒</span>
+                  </div>
+                  <div v-if="hoverItem.details" class="detail-row">
+                      <span class="label">详情:</span>
+                      <span class="value details-text">{{ hoverItem.details }}</span>
+                  </div>
+              </div>
+            </div>
+        </div>
+
       </div>
 
     </div>
@@ -128,11 +163,32 @@ const getItemImage = (item) => {
 
 const itemClicked = (rowIndex, colIndex) => {
   if (colIndex !== 0)
-    currentItemIndex.value = itemIdexMake(rowIndex, colIndex)
+  currentItemIndex.value = itemIdexMake(rowIndex, colIndex)
+}
+const hoverItem = ref(null);
+const currentItemIndex = ref(itemIdexMake(0, 0));
+
+let hoverTimer = null;
+const itemMouseEnter = (rowIndex, colIndex, event) => {
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(() => {
+     hoverItem.value = getItemData(itemIdexMake(rowIndex, colIndex));
+  }, 500);
 }
 
-const currentItemIndex = ref(itemIdexMake(0, 0));
-const hoveredItem = ref(null);
+const itemMouseLeave = (rowIndex, colIndex) => {
+  clearTimeout(hoverTimer);
+  hoverItem.value = null;
+}
+
+const formatBytes = (bytes) => {
+  if (bytes === -1) return "未知";
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 
 // 示例数据
 const defaultData = [
@@ -330,7 +386,6 @@ const zoomRange = { min: 10, max: 400, step: 10 };
           }
 
           &.firsts {
-            pointer-events: none;
             cursor: default;
             opacity: 0.9;
             border-right: 2px solid #888;
@@ -370,6 +425,51 @@ const zoomRange = { min: 10, max: 400, step: 10 };
             word-break: break-word;
           }
         }
+      }
+    }
+
+    .image-detail {
+      z-index: 20;
+
+      position: absolute;
+      top: 100px;
+      right: -500px;
+      width: 500px;
+
+      background: #ffff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+
+      padding: 1rem;
+
+      .content {
+          display: flex;
+          gap: 0.5rem;
+          padding-top: 0.2rem;
+
+          .preview {
+            flex: 1;
+            width: 50%;
+          }
+
+          .fields {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .detail-row {
+              display: flex;
+              gap: 0.5rem;
+              .label {
+                font-weight: 600;
+                flex-shrink: 0;
+              }
+              .value {
+                flex: 1;
+              }
+            }
+          }
       }
     }
   }

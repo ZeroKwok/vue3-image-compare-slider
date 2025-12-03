@@ -9,7 +9,7 @@
       "details": "这是一张美丽的风景照片，拍摄于海边。\n照片包含蓝天、白云和大海。"
     },
     {
-      "label": "Flux 12222",
+      "label": "Flux 1",
       "file": "grayscale/2.jpg",
       "width": 4032,
       "height": 3024,
@@ -17,7 +17,7 @@
       "elapsedTime": 1.5
     },
     {
-      "label": "GPT ",
+      "label": "GPT 4",
       "file": "grayscale/3.jpg",
       "width": 4032,
       "height": 3024,
