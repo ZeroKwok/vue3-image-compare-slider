@@ -138,7 +138,7 @@ const hoveredItem = ref(null);
 const defaultData = [
   [
     {
-      "label": "origin",
+      "label": "原图",
       "file": "grayscale/1.jpg",
       "width": 4032,
       "height": 3024,
@@ -164,7 +164,7 @@ const defaultData = [
   ],
   [
     {
-      "label": "origin",
+      "label": "原图",
       "file": "darksome/1.jpg",
       "width": 1200,
       "height": 900,
@@ -180,7 +180,7 @@ const defaultData = [
   ],
   [
     {
-      "label": "origin",
+      "label": "原图",
       "file": "colour/1.jpg",
       "width": 1024,
       "height": 576,

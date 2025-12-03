@@ -1,0 +1,60 @@
+[
+  [
+    {
+      "label": "原图",
+      "file": "grayscale/1.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": -1,
+      "details": "这是一张美丽的风景照片，拍摄于海边。\n照片包含蓝天、白云和大海。"
+    },
+    {
+      "label": "Flux 12222",
+      "file": "grayscale/2.jpg",
+      "width": 4032,
+      "height": 3024,
+      "bytes": -1,
+      "elapsedTime": 1.5
+    },
+    {
+      "label": "GPT ",
+      "file": "grayscale/3.jpg",
+      "width": 4032,
+      "height": 3024,
+      "elapsedTime": 23.5,
+      "details": "美化, 上色。"
+    }
+  ],
+  [
+    {
+      "label": "原图",
+      "file": "darksome/1.jpg",
+      "width": 1200,
+      "height": 900,
+      "details": "这是一张暗色系照片，拍摄于夜空。"
+    },
+    {
+      "label": "Flux 1",
+      "file": "darksome/2.jpg",
+      "width": 1200,
+      "height": 900,
+      "elapsedTime": 7.5
+    }
+  ],
+  [
+    {
+      "label": "原图",
+      "file": "colour/1.jpg",
+      "width": 1024,
+      "height": 576,
+      "details": ""
+    },
+    {
+      "label": "Flux 1",
+      "file": "colour/2.jpg",
+      "width": 1024,
+      "height": 576,
+      "elapsedTime": 7.5
+    }
+  ]
+]
