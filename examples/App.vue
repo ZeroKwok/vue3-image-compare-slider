@@ -10,12 +10,20 @@
       </div>
 
       <div class="sidebar-content">
+        <div class="sidebar-controls">
+          <label class="hide-first">
+            <input type="checkbox" v-model="hideFirstColumn" />
+            <span>隐藏第一列(原图)</span>
+          </label>
+        </div>
         <div class="image-list">
           <div v-for="(row, rowIndex) in imageData" :key="rowIndex" class="row">
-            <div v-for="(item, colIndex) in row" :key="colIndex" class="item"
-              :class="{ active: itemIndexEquals(currentItemIndex, itemIdexMake(rowIndex, colIndex)) }"
-              @mouseenter="hoveredItem = itemIdexMake(rowIndex, colIndex)" @mouseleave="hoveredItem = null"
-              @click="currentItemIndex = itemIdexMake(rowIndex, colIndex)">
+            <div v-for="(item, colIndex) in row" :key="colIndex"
+              class="item" :class="{ 
+                active: itemIndexEquals(currentItemIndex, itemIdexMake(rowIndex, colIndex)), 
+                firsts: colIndex === 0,
+                hiden: hideFirstColumn && colIndex === 0 }"
+              @click="itemClicked(rowIndex, colIndex)">
               <img class="image" :src="getItemImage(item)" :alt="item?.label || item.file" />
               <span class="label">{{ item.label || item.file }}</span>
             </div>
@@ -57,12 +65,14 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import ImageSliderCompare from "vue3-image-compare-slider";
+import { watch } from "vue";
 
 // 侧边栏
 const sidebarWidth = ref(320)
 const sidebarMinWidth = 100
 const sidebarMaxWidth = 550
 const sidebarCollapsed = ref(false)
+const hideFirstColumn = ref(false)
 
 const sidebarStartResize = (e) => {
   e.preventDefault()
@@ -114,6 +124,11 @@ const getItemImage = (item) => {
   if (import.meta.env.BASE_URL !== '/')
     return `${import.meta.env.BASE_URL}/images/${item.file}`;
   return `/images/${item.file}`;
+}
+
+const itemClicked = (rowIndex, colIndex) => {
+  if (colIndex !== 0)
+    currentItemIndex.value = itemIdexMake(rowIndex, colIndex)
 }
 
 const currentItemIndex = ref(itemIdexMake(0, 0));
@@ -193,6 +208,12 @@ onMounted(async () => {
   }
 });
 
+// 如果隐藏第一列，且当前选择在第一列，则尝试切换到该行的下一列（如果存在）
+watch(hideFirstColumn, (val) => {
+  if (val && currentItemIndex.value.col === 0) 
+      currentItemIndex.value = itemIdexMake(currentItemIndex.value.row, 1);
+});
+
 // 处理数据 - 如果没有传入数据，使用示例数据
 const imageData = computed(() => {
   return loadData.value ? loadData.value : defaultData
@@ -211,6 +232,7 @@ const zoomRange = { min: 10, max: 400, step: 10 };
   width: 100%;
   height: 100%;
   background-color: #fff;
+  font-size: 12px;
 
   display: flex;
   flex-direction: row;
@@ -259,7 +281,7 @@ const zoomRange = { min: 10, max: 400, step: 10 };
         cursor: pointer;
 
         background-color: #ddd8;
-        color: #888;
+        color: #333;
 
         &hover {
           background-color: #ccca;
@@ -271,13 +293,20 @@ const zoomRange = { min: 10, max: 400, step: 10 };
       height: 100%;
     }
 
+    .sidebar-controls {
+      padding: 0.5rem;
+      .hide-first {
+        cursor: pointer;
+        display: flex;
+        gap: 0.2rem;
+      }
+    }
+
     .image-list {
       height: 100%;
-      border: 1px solid #ccc;
       padding: 3px 3px;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
       overflow: auto;
 
       .row {
@@ -298,6 +327,27 @@ const zoomRange = { min: 10, max: 400, step: 10 };
           &:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+          }
+
+          &.firsts {
+            pointer-events: none;
+            cursor: default;
+            opacity: 0.9;
+            border-right: 2px solid #888;
+          }
+
+          &.firsts:hover {
+            transform: none;
+            box-shadow: none;
+          }
+
+          &.firsts.active {
+            background-color: inherit;
+            box-shadow: none;
+          }
+
+          &.hiden {
+            display: none;
           }
 
           &.active {
@@ -326,7 +376,6 @@ const zoomRange = { min: 10, max: 400, step: 10 };
 
   .image-viewer {
     flex-grow: 1;
-    border: 1px solid #ccc;
     position: relative;
 
     .controls {
