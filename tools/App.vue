@@ -256,7 +256,7 @@ const loadData = ref(null);
 onMounted(async () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
-    const dataUrl = urlParams.get('data') || "data.json";
+    const dataUrl = urlParams.get('data') || "images/data.json";
     const response = await fetch(dataUrl);
     if (response.ok)
       loadData.value = await response.json();
