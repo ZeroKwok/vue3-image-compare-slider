@@ -255,8 +255,11 @@ const defaultData = [
 const loadData = ref(null);
 onMounted(async () => {
   try {
-    const file = await fetch("data.json");
-    loadData.value = await file.json();
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataUrl = urlParams.get('data') || "data.json";
+    const response = await fetch(dataUrl);
+    if (response.ok)
+      loadData.value = await response.json();
   }
   catch (e) {
     console.warn(`load the data.js failed, `, e);
