@@ -156,8 +156,8 @@ const getItemData = (itemIndex) => {
 const getItemImage = (item) => {
   if (!item) return null;
   if (import.meta.env.BASE_URL !== '/')
-    return `${import.meta.env.BASE_URL}/images/${item.file}`;
-  return `/images/${item.file}`;
+    return `${import.meta.env.BASE_URL}/${item.file}`;
+  return item.file;
 }
 
 const itemClicked = (rowIndex, colIndex) => {
@@ -194,7 +194,7 @@ const defaultData = [
   [
     {
       "label": "原图",
-      "file": "grayscale/1.jpg",
+      "file": "/images/grayscale/1.jpg",
       "width": 4032,
       "height": 3024,
       "bytes": -1,
@@ -202,7 +202,7 @@ const defaultData = [
     },
     {
       "label": "Flux 1",
-      "file": "grayscale/2.jpg",
+      "file": "/images/grayscale/2.jpg",
       "width": 4032,
       "height": 3024,
       "bytes": -1,
@@ -210,7 +210,7 @@ const defaultData = [
     },
     {
       "label": "GPT ",
-      "file": "grayscale/3.jpg",
+      "file": "/images/grayscale/3.jpg",
       "width": 4032,
       "height": 3024,
       "elapsedTime": 23.5,
@@ -220,14 +220,14 @@ const defaultData = [
   [
     {
       "label": "原图",
-      "file": "darksome/1.jpg",
+      "file": "/images/darksome/1.jpg",
       "width": 1200,
       "height": 900,
       "details": "这是一张暗色系照片，拍摄于夜空。"
     },
     {
       "label": "Flux 1",
-      "file": "darksome/2.jpg",
+      "file": "/images/darksome/2.jpg",
       "width": 1200,
       "height": 900,
       "elapsedTime": 7.5
@@ -236,14 +236,14 @@ const defaultData = [
   [
     {
       "label": "原图",
-      "file": "colour/1.jpg",
+      "file": "/images/colour/1.jpg",
       "width": 1024,
       "height": 576,
       "details": ""
     },
     {
       "label": "Flux 1",
-      "file": "colour/2.jpg",
+      "file": "/images/colour/2.jpg",
       "width": 1024,
       "height": 576,
       "elapsedTime": 7.5
