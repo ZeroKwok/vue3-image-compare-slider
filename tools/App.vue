@@ -75,7 +75,7 @@
         <el-slider class="zoom" v-model="zoom" :min="zoomRange.min" :max="zoomRange.max" :step="zoomRange.step"
           :vertical="true" height="80px" :format-tooltip="val => `Zoom: ${val.toFixed(2)}%`" />
 
-        <el-dropdown class="fit-mode" @command="mode => imageView.updateFitMode(mode)">
+        <el-dropdown class="fit-mode dropdown" @command="mode => imageView.updateFitMode(mode)">
           <el-button plain>
             <el-icon>
               <FullScreen />
@@ -93,13 +93,30 @@
       </div>
 
     </div>
+  
+    <div class="fixed-container">
+      <el-dropdown class="menu dropdown" @command="menuCommand">
+        <el-button plain>
+          <el-icon>
+            <More />
+          </el-icon>
+        </el-button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <!-- <el-dropdown-item command="github">GitHub</el-dropdown-item> -->
+            <el-dropdown-item command="about">关于</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
+    </div>
   </div>
+
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import ImageSliderCompare from "vue3-image-compare-slider";
-import { watch } from "vue";
+import { ElMessageBox } from 'element-plus'
 
 // 侧边栏
 const sidebarWidth = ref(320)
@@ -283,6 +300,23 @@ const currentRight = computed(() => getItemImage(getItemData(currentItemIndex.va
 const imageView = ref(null);
 const zoom = ref(100);
 const zoomRange = { min: 10, max: 400, step: 10 };
+
+// 菜单
+const menuCommand = (command) => {
+  if (command === 'github') {
+    window.open('https://github.com/ZeroKwok/vue3-image-compare-slider');
+  }
+  else if (command === 'about') {
+    ElMessageBox.alert(
+      '1.3.0 powered by Zero <zero.kwok@foxmail.com>',
+      'About: Image Compare Slider - Tools',
+      { confirmButtonText: 'OK' }
+    );
+  }
+}
+
+document.title = "Image Compare Slider - Tools";
+
 </script>
 
 <style lang="scss" scoped>
@@ -351,9 +385,10 @@ const zoomRange = { min: 10, max: 400, step: 10 };
       height: 100%;
       display: flex;
       flex-direction: column;
-    
+
       .sidebar-controls {
         padding: 0.5rem;
+
         .hide-first {
           cursor: pointer;
           display: flex;
@@ -446,32 +481,34 @@ const zoomRange = { min: 10, max: 400, step: 10 };
         padding: 1rem;
 
         .content {
+          display: flex;
+          gap: 0.5rem;
+          padding-top: 0.2rem;
+
+          .preview {
+            flex: 1;
+            width: 50%;
+          }
+
+          .fields {
             display: flex;
+            flex-direction: column;
             gap: 0.5rem;
-            padding-top: 0.2rem;
 
-            .preview {
-              flex: 1;
-              width: 50%;
-            }
-
-            .fields {
+            .detail-row {
               display: flex;
-              flex-direction: column;
               gap: 0.5rem;
 
-              .detail-row {
-                display: flex;
-                gap: 0.5rem;
-                .label {
-                  font-weight: 600;
-                  flex-shrink: 0;
-                }
-                .value {
-                  flex: 1;
-                }
+              .label {
+                font-weight: 600;
+                flex-shrink: 0;
+              }
+
+              .value {
+                flex: 1;
               }
             }
+          }
         }
       }
     }
@@ -530,18 +567,45 @@ const zoomRange = { min: 10, max: 400, step: 10 };
           transform: translateX(-25%);
         }
       }
+    }
+  }
 
-      .fit-mode {
-        button {
-          padding: 0.5rem;
-          color: rgba(0, 0, 0, 0.8);
-          border-color: rgba(0, 0, 0, 0.8);
+  .fixed-container {
+    z-index: 20;
+    position: fixed;
+    top: 10px;
+    right: 10px;
 
-          &:focus-visible {
-            outline: 2px solid #000;
-          }
-        }
-      }
+    width: 50px;
+    height: 50px;
+
+    border-radius: 4px;
+    border: 1px solid #999;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+    user-select: none;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0.5rem;
+
+    &:hover,
+    &:active {
+      background: #ffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+  }
+}
+
+.dropdown {
+  button {
+    padding: 0.5rem;
+    color: rgba(0, 0, 0, 0.8);
+    border-color: rgba(0, 0, 0, 0.8);
+
+    &:focus-visible {
+      outline: 2px solid #000;
     }
   }
 }
