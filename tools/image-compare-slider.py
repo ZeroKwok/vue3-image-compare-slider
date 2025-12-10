@@ -1,5 +1,11 @@
 #! python
 # -*- coding: utf-8 -*-
+#
+# This file is part of the image-compare-slider project.
+# Copyright (c) 2020-2025 zero <zero.kwok@foxmail.com>
+#
+# For the full copyright and license information, please view the LICENSE
+# file that was distributed with this source code.
 
 '''
 一个Python脚本, 用于扫描指定目录中的图片, 来生成下面格式的 JSON 文件, 然后使用 HTML 的可视化模板来显示这个 JSON 的内容.
@@ -168,7 +174,7 @@ def run_server(dirs, host, port):
 
     def make_handler(dir):
         def handler(f='index.html'):
-            print(f"fetch: {dir}, {f}")
+            # print(f"fetch: {dir}, {f}")
             return send_from_directory(dir, f)
         return handler
 
