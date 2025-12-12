@@ -119,7 +119,7 @@ import ImageSliderCompare from "vue3-image-compare-slider";
 import { ElMessageBox } from 'element-plus'
 
 // 侧边栏
-const sidebarWidth = ref(320)
+const sidebarWidth = ref(230)
 const sidebarMinWidth = 100
 const sidebarMaxWidth = 550
 const sidebarCollapsed = ref(false)
@@ -182,7 +182,7 @@ const itemClicked = (rowIndex, colIndex) => {
   currentItemIndex.value = itemIdexMake(rowIndex, colIndex)
 }
 const hoverItem = ref(null);
-const currentItemIndex = ref(itemIdexMake(0, 0));
+const currentItemIndex = ref(itemIdexMake(0, 1));
 
 let hoverTimer = null;
 const itemMouseEnter = (rowIndex, colIndex, event) => {
