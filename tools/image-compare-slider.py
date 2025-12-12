@@ -78,7 +78,10 @@ import os
 import re
 import json
 import argparse
+import mimetypes
 
+# 修复 Flask 静态文件的 MIME 类型问题
+mimetypes.add_type('application/javascript', '.js')
 try:
     from flask import Flask, send_from_directory
     from PIL import Image
