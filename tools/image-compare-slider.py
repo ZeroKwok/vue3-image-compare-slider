@@ -89,6 +89,18 @@ except ImportError as e:
     print("Missing required module. Please install dependencies with:")
     print("  python -m pip install Flask Pillow")
 
+
+def read_image_info(path):
+    """读取宽、高、字节大小"""
+    try:
+        with Image.open(path) as im:
+            width, height = im.size
+    except Exception:
+        width = height = 0
+
+    return width, height, os.path.getsize(path)
+
+
 def scan_images(directory: str):
     """
     扫描目录，返回分组后的图像信息：
@@ -119,24 +131,13 @@ def scan_images(directory: str):
     return groups
 
 
-def read_image_info(path):
-    """读取宽、高、字节大小"""
-    try:
-        with Image.open(path) as im:
-            width, height = im.size
-    except Exception:
-        width = height = 0
-
-    return width, height, os.path.getsize(path)
-
-
-def build_json(directory: str):
+def make_image_mate_data(directory: str):
     """
     解析扫描到的文件，生成最终 JSON 结构
     """
     groups = scan_images(directory)
+    
     result = []
-
     for name, files in sorted(groups.items(), key=lambda x: x[0]):
         items = []
 
@@ -168,8 +169,13 @@ def build_json(directory: str):
         # 原图排最前
         items.sort(key=lambda x: (0, x["label"]) if "_origin." in x["file"] else (1, x["label"]))
         result.append(items)
+        
+    json_path = os.path.join(directory, "data.json")
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+    print(f"Writen: {json_path}")
 
-    return result
+    return True
 
 def run_server(dirs, host, port):
     url = f"http://{host}:{port}"
@@ -216,15 +222,9 @@ def main():
     # 1. 生成 JSON 
     if args.scan:
         print(f"Scanning directory: {args.directory}")
-        data = build_json(args.directory)
-        if not data:
+        if not make_image_mate_data(args.directory):
             print("There is no image file in the directory.。")
             return
-
-        json_path = os.path.join(args.directory, "data.json")
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"Writen: {json_path}")
 
     # 2. 启动预览服务器 
     if args.view:
