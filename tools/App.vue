@@ -11,6 +11,12 @@
 
       <div class="sidebar-content">
         <div class="sidebar-controls">
+          <el-tooltip v-if="Object.keys(indexUrl).length > 0" content="索引页">
+            <el-button circle class="index" size="small" @click="pageGoto('/metadata/list.html')">
+              <el-icon><HomeFilled /></el-icon>
+            </el-button>
+          </el-tooltip>
+
           <label class="hide-first">
             <input type="checkbox" v-model="hideFirstColumn" />
             <span>隐藏第一列(原图)</span>
@@ -18,51 +24,48 @@
         </div>
         <div class="image-list">
           <div v-for="(row, rowIndex) in imageData" :key="rowIndex" class="row">
-            <div v-for="(item, colIndex) in row" :key="colIndex"
-              class="item" :class="{ 
+            <div v-for="(item, colIndex) in row" :key="colIndex" class="item" :class="{ 
                 active: itemIndexEquals(currentItemIndex, itemIdexMake(rowIndex, colIndex)), 
                 firsts: colIndex === 0,
-                hiden: hideFirstColumn && colIndex === 0 }"
-              @click="itemClicked(rowIndex, colIndex)"
-              @mouseenter="itemMouseEnter(rowIndex, colIndex, $event)"
-              @mouseleave="itemMouseLeave(rowIndex, colIndex)">
+                hiden: hideFirstColumn && colIndex === 0 }" @click="itemClicked(rowIndex, colIndex)"
+              @mouseenter="itemMouseEnter(rowIndex, colIndex, $event)" @mouseleave="itemMouseLeave(rowIndex, colIndex)">
               <img class="image" :src="getItemImage(item)" :alt="item?.label || item.file" />
               <span v-if="colIndex === 0" class="label">{{ item?.label || item.file }}</span>
               <span v-else class="label">{{ item?.label || item.file }} ({{ item?.elapsedTime || ''}})</span>
             </div>
           </div>
         </div>
-        
+
         <!-- 提示信息 -->
         <div class="image-detail" v-if="hoverItem">
-            <div class="content">
-              <img class="preview" :src="getItemImage(hoverItem)"/>
-              <div class="fields">
-                  <div class="detail-row">
-                      <span class="label">类型:</span>
-                      <span class="value">{{ hoverItem?.label || '未知' }}</span>
-                  </div>
-                  <div class="detail-row">
-                      <span class="label">尺寸:</span>
-                      <span class="value">{{ hoverItem.width }} × {{ hoverItem.height }} 像素</span>
-                  </div>
-                  <div class="detail-row">
-                      <span class="label">大小:</span>
-                      <span class="value">{{ formatBytes(hoverItem?.bytes || -1) }}</span>
-                  </div>
-                  <div v-if="hoverItem.elapsedTime" class="detail-row">
-                      <span class="label">处理时间:</span>
-                      <span class="value">{{ hoverItem.elapsedTime }} 秒</span>
-                  </div>
-                  <div v-if="hoverItem.details" class="detail-row">
-                      <span class="label">详情:</span>
-                      <span class="value details-text">{{ hoverItem.details }}</span>
-                  </div>
+          <div class="content">
+            <img class="preview" :src="getItemImage(hoverItem)" />
+            <div class="fields">
+              <div class="detail-row">
+                <span class="label">类型:</span>
+                <span class="value">{{ hoverItem?.label || '未知' }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">尺寸:</span>
+                <span class="value">{{ hoverItem.width }} × {{ hoverItem.height }} 像素</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">大小:</span>
+                <span class="value">{{ formatBytes(hoverItem?.bytes || -1) }}</span>
+              </div>
+              <div v-if="hoverItem.elapsedTime" class="detail-row">
+                <span class="label">处理时间:</span>
+                <span class="value">{{ hoverItem.elapsedTime }} 秒</span>
+              </div>
+              <div v-if="hoverItem.details" class="detail-row">
+                <span class="label">详情:</span>
+                <span class="value details-text">{{ hoverItem.details }}</span>
               </div>
             </div>
-            <div v-if="hoverItem.file">
-                {{ hoverItem.file }}
-            </div>
+          </div>
+          <div v-if="hoverItem.file">
+            {{ hoverItem.file }}
+          </div>
         </div>
       </div>
 
@@ -94,28 +97,39 @@
       </div>
 
     </div>
-  
+
     <div class="fixed-container">
-      <el-dropdown class="menu dropdown" @command="menuCommand">
-        <el-button plain>
-          <el-icon>
-            <More />
-          </el-icon>
+      <el-tooltip content="关于" placement="left">
+        <el-button plain @click="menuCommand('about')">
+          <el-icon><Promotion /></el-icon>
         </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <!-- <el-dropdown-item command="github">GitHub</el-dropdown-item> -->
-            <el-dropdown-item command="about">关于</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
+      </el-tooltip>
+
+      <el-tooltip content="转到" placement="left">
+        <el-dropdown class="menu dropdown" trigger="click">
+          <el-button plain>
+            <el-icon><Link /></el-icon>
+          </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <template v-if="Object.keys(indexUrl).length > 0">
+                  <el-dropdown-item @click="pageGoto('/metadata/list.html')">索引</el-dropdown-item>
+                  <el-dropdown-item v-for="(url, name) in indexUrl" :key="url" @click="pageGoto(url)">
+                    {{ name }}
+                  </el-dropdown-item>
+                </template>
+                <el-dropdown-item v-else>无</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+        </el-dropdown>
+      </el-tooltip>
     </div>
   </div>
 
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, reactive, onMounted } from "vue";
 import ImageSliderCompare from "vue3-image-compare-slider";
 import { ElMessageBox } from 'element-plus'
 
@@ -167,7 +181,7 @@ const itemIndexEquals = (a, b) => {
 }
 
 const getItemData = (itemIndex) => {
-  if (!itemIndex) return null;
+  if (!itemIndex || imageData.value.length <= 0) return null;
   return imageData.value[itemIndex.row][itemIndex.col];
 }
 
@@ -183,7 +197,7 @@ const itemClicked = (rowIndex, colIndex) => {
   currentItemIndex.value = itemIdexMake(rowIndex, colIndex)
 }
 const hoverItem = ref(null);
-const currentItemIndex = ref(itemIdexMake(0, 1));
+const currentItemIndex = ref(null);
 
 let hoverTimer = null;
 const itemMouseEnter = (rowIndex, colIndex, event) => {
@@ -208,86 +222,94 @@ const formatBytes = (bytes) => {
 }
 
 // 示例数据
-const defaultData = [
-  [
-    {
-      "label": "原图",
-      "file": "/images/grayscale/1.jpg",
-      "width": 4032,
-      "height": 3024,
-      "bytes": -1,
-      "details": "这是一张美丽的风景照片，拍摄于海边。\n照片包含蓝天、白云和大海。"
-    },
-    {
-      "label": "Flux 1",
-      "file": "/images/grayscale/2.jpg",
-      "width": 4032,
-      "height": 3024,
-      "bytes": -1,
-      "elapsedTime": 1.5
-    },
-    {
-      "label": "GPT ",
-      "file": "/images/grayscale/3.jpg",
-      "width": 4032,
-      "height": 3024,
-      "elapsedTime": 23.5,
-      "details": "美化, 上色。"
-    },
-  ],
-  [
-    {
-      "label": "原图",
-      "file": "/images/darksome/1.jpg",
-      "width": 1200,
-      "height": 900,
-      "details": "这是一张暗色系照片，拍摄于夜空。"
-    },
-    {
-      "label": "Flux 1",
-      "file": "/images/darksome/2.jpg",
-      "width": 1200,
-      "height": 900,
-      "elapsedTime": 7.5
-    }
-  ],
-  [
-    {
-      "label": "原图",
-      "file": "/images/colour/1.jpg",
-      "width": 1024,
-      "height": 576,
-      "details": ""
-    },
-    {
-      "label": "Flux 1",
-      "file": "/images/colour/2.jpg",
-      "width": 1024,
-      "height": 576,
-      "elapsedTime": 7.5
-    }
-  ]
-];
+// const defaultData = [
+//   [
+//     {
+//       "label": "原图",
+//       "file": "/images/grayscale/1.jpg",
+//       "width": 4032,
+//       "height": 3024,
+//       "bytes": -1,
+//       "details": "这是一张美丽的风景照片，拍摄于海边。\n照片包含蓝天、白云和大海。"
+//     },
+//     {
+//       "label": "Flux 1",
+//       "file": "/images/grayscale/2.jpg",
+//       "width": 4032,
+//       "height": 3024,
+//       "bytes": -1,
+//       "elapsedTime": 1.5
+//     },
+//     {
+//       "label": "GPT ",
+//       "file": "/images/grayscale/3.jpg",
+//       "width": 4032,
+//       "height": 3024,
+//       "elapsedTime": 23.5,
+//       "details": "美化, 上色。"
+//     },
+//   ],
+//   [
+//     {
+//       "label": "原图",
+//       "file": "/images/darksome/1.jpg",
+//       "width": 1200,
+//       "height": 900,
+//       "details": "这是一张暗色系照片，拍摄于夜空。"
+//     },
+//     {
+//       "label": "Flux 1",
+//       "file": "/images/darksome/2.jpg",
+//       "width": 1200,
+//       "height": 900,
+//       "elapsedTime": 7.5
+//     }
+//   ],
+//   [
+//     {
+//       "label": "原图",
+//       "file": "/images/colour/1.jpg",
+//       "width": 1024,
+//       "height": 576,
+//       "details": ""
+//     },
+//     {
+//       "label": "Flux 1",
+//       "file": "/images/colour/2.jpg",
+//       "width": 1024,
+//       "height": 576,
+//       "elapsedTime": 7.5
+//     }
+//   ]
+// ];
+const defaultData = [];
 
 // 尝试加载数据
 const loadData = ref(null);
+const indexUrl = ref({"Path": "uril"});
+
 onMounted(async () => {
+  const urlParams = new URLSearchParams(window.location.search);
   try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const dataUrl = urlParams.get('data') || "images/data.json";
-    const response = await fetch(dataUrl);
-    if (response.ok)
+    const response = await fetch(urlParams.get('data') || "images/data.json");
+    if (response.ok) {
       loadData.value = await response.json();
+      if (loadData.value.length > 0)
+        currentItemIndex.value = itemIdexMake(0, 0);
+    }
   }
   catch (e) {
-    console.warn(`load the data.js failed, `, e);
+    console.warn(`load the data.json failed, `, e);
   }
-});
 
-// 如果隐藏第一列，且当前选择在第一列，则尝试切换到该行的下一列（如果存在）
-watch(hideFirstColumn, (val) => {
-  if (val && currentItemIndex.value.col === 0) 
-      currentItemIndex.value = itemIdexMake(currentItemIndex.value.row, 1);
+  try {
+    const response = await fetch(urlParams.get('index') || "metadata/index.json");
+    if (response.ok)
+      indexUrl.value = await response.json();
+  }
+  catch (e) {
+    console.warn(`load the index.json failed, `, e);
+  }
 });
 
 // 处理数据 - 如果没有传入数据，使用示例数据
@@ -296,7 +318,7 @@ const imageData = computed(() => {
 })
 
 // 视图
-const currentLeft = computed(() => getItemImage(getItemData({ row: currentItemIndex.value.row, col: 0 })));
+const currentLeft = computed(() => getItemImage(getItemData({ row: currentItemIndex.value?.row || 0, col: 0 })));
 const currentRight = computed(() => getItemImage(getItemData(currentItemIndex.value)));
 const imageView = ref(null);
 const zoom = ref(100);
@@ -314,6 +336,10 @@ const menuCommand = (command) => {
       { confirmButtonText: 'OK' }
     );
   }
+}
+
+const pageGoto = (url) => {
+  window.location.href = url;
 }
 
 document.title = "Image Compare Slider - Tools";
@@ -389,6 +415,13 @@ document.title = "Image Compare Slider - Tools";
 
       .sidebar-controls {
         padding: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        .index {
+          
+        }
 
         .hide-first {
           cursor: pointer;
@@ -579,7 +612,6 @@ document.title = "Image Compare Slider - Tools";
     right: 10px;
 
     width: 50px;
-    height: 50px;
 
     border-radius: 4px;
     border: 1px solid #999;
@@ -588,9 +620,9 @@ document.title = "Image Compare Slider - Tools";
     user-select: none;
 
     display: flex;
-    justify-content: flex-end;
-    align-items: center;
+    flex-direction: column;
     padding: 0.5rem;
+    gap: 1rem;
 
     &:hover,
     &:active {
@@ -598,9 +630,11 @@ document.title = "Image Compare Slider - Tools";
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     }
   }
+
 }
 
-.dropdown {
+.dropdown,
+.fixed-container{
   button {
     padding: 0.5rem;
     color: rgba(0, 0, 0, 0.8);
@@ -611,4 +645,5 @@ document.title = "Image Compare Slider - Tools";
     }
   }
 }
+
 </style>
