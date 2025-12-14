@@ -35,14 +35,12 @@
         
         <!-- 提示信息 -->
         <div class="image-detail" v-if="hoverItem">
-            <h3>{{ hoverItem?.label || '未知' }}</h3>
-
             <div class="content">
               <img class="preview" :src="getItemImage(hoverItem)"/>
               <div class="fields">
                   <div class="detail-row">
-                      <span class="label">文件:</span>
-                      <span class="value">{{ hoverItem.file }}</span>
+                      <span class="label">类型:</span>
+                      <span class="value">{{ hoverItem?.label || '未知' }}</span>
                   </div>
                   <div class="detail-row">
                       <span class="label">尺寸:</span>
@@ -61,6 +59,9 @@
                       <span class="value details-text">{{ hoverItem.details }}</span>
                   </div>
               </div>
+            </div>
+            <div v-if="hoverItem.file">
+                {{ hoverItem.file }}
             </div>
         </div>
       </div>
@@ -478,12 +479,13 @@ document.title = "Image Compare Slider - Tools";
         border-radius: 4px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 
-        padding: 1rem;
+        padding: 0.5rem;
 
         .content {
           display: flex;
           gap: 0.5rem;
           padding-top: 0.2rem;
+          padding-bottom: 0.2rem;
 
           .preview {
             flex: 1;
@@ -498,12 +500,12 @@ document.title = "Image Compare Slider - Tools";
             .detail-row {
               display: flex;
               gap: 0.5rem;
-
+  
               .label {
                 font-weight: 600;
                 flex-shrink: 0;
               }
-
+  
               .value {
                 flex: 1;
               }
