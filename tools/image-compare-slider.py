@@ -79,11 +79,13 @@ import re
 import json
 import argparse
 import mimetypes
+import urllib.parse
+from pathlib import Path
 
 # 修复 Flask 静态文件的 MIME 类型问题
 mimetypes.add_type('application/javascript', '.js')
 try:
-    from flask import Flask, send_from_directory
+    from flask import Flask, send_from_directory, render_template
     from PIL import Image
 except ImportError as e:
     print("Missing required module. Please install dependencies with:")
@@ -100,6 +102,11 @@ def read_image_info(path):
 
     return width, height, os.path.getsize(path)
 
+def relative_path_to_url(path:Path):
+    """将相对路径转换为 URL"""
+    if type(path) == str:
+        path = Path(path)
+    return '/'.join(urllib.parse.quote(part) for part in path.parts)
 
 def scan_images(directory: str):
     """
@@ -122,7 +129,7 @@ def scan_images(directory: str):
 
         m = image_pattern.match(fname)
         if not m:
-            print(f"Skip {fname}.")
+            print(f"Skip file: {fname}.")
             continue
 
         img_id = m.group("name")
@@ -130,7 +137,7 @@ def scan_images(directory: str):
 
     return groups
 
-
+'''
 def make_image_mate_data(directory: str):
     """
     解析扫描到的文件，生成最终 JSON 结构
@@ -176,8 +183,70 @@ def make_image_mate_data(directory: str):
     print(f"Writen: {json_path}")
 
     return True
+'''
 
-def run_server(dirs, host, port):
+def make_image_mate_data(directory: str):
+    """
+    递归解析所有子目录，生成最终 JSON 结构
+    返回生成 data.json 的目录列表
+    """
+    pathDirs = []
+    pathRoot = Path(directory).resolve()
+    
+    # 递归遍历所有子目录
+    for root, dirs, files in os.walk(directory):
+        pathCurr = Path(root)
+        
+        # 扫描当前目录的图像文件
+        groups = scan_images(str(pathCurr))
+        if not groups:
+            continue  # 如果没有匹配的图像文件，跳过这个目录
+        
+        # 准备当前目录的元数据
+        result = []
+        for name, files in sorted(groups.items(), key=lambda x: x[0]):
+            items = []
+
+            for fname, meta in files:
+                fullpath = pathCurr / fname
+                width, height, size = read_image_info(str(fullpath))
+
+                workflow = meta["workflow"]
+                elapsed = meta["elapsed"]
+
+                if workflow == "origin" or workflow is None:
+                    label = f"{name} (原图)"
+                else:
+                    label = workflow
+
+                item = {
+                    "label": label,
+                    "file": '/images/' + relative_path_to_url(fullpath.relative_to(pathRoot)),
+                    "width": width,
+                    "height": height,
+                    "bytes": size,
+                }
+
+                if workflow is not None and elapsed is not None:
+                    item["elapsedTime"] = float(elapsed)
+
+                items.append(item)
+
+            # 原图排最前
+            items.sort(key=lambda x: (0, x["label"]) if "_origin." in x["file"] else (1, x["label"]))
+            result.append(items)
+        
+        # 在当前目录生成 data.json
+        json_path = pathCurr / "data.json"
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+        
+        print(f"Written: {json_path}")
+        pathDirs.append(str(pathCurr.relative_to(pathRoot)))
+
+    return pathDirs
+
+def run_server(dirs, indexs, host, port):
     url = f"http://{host}:{port}"
     print(f"Running: {url}")
 
@@ -193,6 +262,10 @@ def run_server(dirs, host, port):
         handler = make_handler(dir)
         app.add_url_rule(route, dir, handler)
         app.add_url_rule(f'{route}/<path:f>', f'{dir}/<path:f>', handler)
+
+    @app.route('/list')
+    def index_list():
+        return '<br>'.join(indexs)
     app.run(host=host, port=port, debug=False)
 
 def main():
@@ -218,13 +291,23 @@ def main():
         print("Debugging mode enabled.")
         print("  - args:", args)
         input('Wait for debugging and press Enter to continue...')
+        
+    args.directory = os.path.abspath(args.directory)
+    pathMate = os.path.join(args.directory, "mate.json")
 
     # 1. 生成 JSON 
     if args.scan:
         print(f"Scanning directory: {args.directory}")
-        if not make_image_mate_data(args.directory):
+        pathDirs = make_image_mate_data(args.directory)
+        if not pathDirs:
             print("There is no image file in the directory.。")
             return
+        print(f"Scanning result: {pathDirs}")
+
+        pathDirs = [p for p in pathDirs if p != '.']
+        if pathDirs:
+            with open(pathMate, "w", encoding="utf-8") as f:
+                json.dump(pathDirs, f, ensure_ascii=False, indent=2)
 
     # 2. 启动预览服务器 
     if args.view:
@@ -235,9 +318,25 @@ def main():
             else:
                 print("Template directory is required for preview server.")
                 return
+        else:
+            args.template = os.path.abspath(args.template)
+    
+        pathDirs = []
+        if os.path.exists(pathMate):
+            with open(pathMate, "r", encoding="utf-8") as f:
+                pathDirs = json.load(f)
 
-        dirs = {'/': os.path.abspath(args.template), '/images': os.path.abspath(args.directory)}
-        run_server(dirs, args.host, args.port)
+        url = f"http://{args.host}:{args.port}"
+        inds = []
+        dirs = {
+            '/': args.template, 
+            '/images': args.directory }
+        for path in pathDirs:
+            stem = f'/images/{relative_path_to_url(path)}'
+            dirs[stem] = os.path.abspath(os.path.join(args.directory, path))
+            inds.append(rf'<a href="{url}?data={stem}/data.json">{path}</a>')
+
+        run_server(dirs, inds, args.host, args.port)
 
 
 if __name__ == "__main__":
