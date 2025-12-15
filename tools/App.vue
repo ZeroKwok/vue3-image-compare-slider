@@ -51,7 +51,15 @@
               </div>
               <div class="detail-row">
                 <span class="label">大小:</span>
-                <span class="value">{{ formatBytes(hoverItem?.bytes || -1) }}</span>
+                <span class="value">{{ formatBytes(hoverItem?.st_size || -1) }}</span>
+              </div>
+              <div v-if="hoverItem.st_ctime" class="detail-row">
+                <span class="label">创建时间:</span>
+                <span class="value">{{ formatTimestamp(hoverItem.st_ctime) }}</span>
+              </div>
+              <div v-if="hoverItem.st_mtime" class="detail-row">
+                <span class="label">修改时间:</span>
+                <span class="value">{{ formatTimestamp(hoverItem.st_mtime) }}</span>
               </div>
               <div v-if="hoverItem.elapsedTime" class="detail-row">
                 <span class="label">处理时间:</span>
@@ -63,9 +71,9 @@
               </div>
             </div>
           </div>
-          <div v-if="hoverItem.file">
-            {{ hoverItem.file }}
-          </div>
+          <div v-if="hoverItem.file" class="filename">
+            <span class="value">{{ decodeURIComponent(hoverItem.file) }}</span>
+          </div> 
         </div>
       </div>
 
@@ -221,6 +229,12 @@ const formatBytes = (bytes) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+const formatTimestamp = (timestamp) => {
+  if (!timestamp || timestamp === -1) return "未知";
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString();
+}
+
 // 示例数据
 // const defaultData = [
 //   [
@@ -295,7 +309,7 @@ onMounted(async () => {
     if (response.ok) {
       loadData.value = await response.json();
       if (loadData.value.length > 0)
-        currentItemIndex.value = itemIdexMake(0, 0);
+        currentItemIndex.value = itemIdexMake(0, 1);
     }
   }
   catch (e) {
@@ -331,7 +345,7 @@ const menuCommand = (command) => {
   }
   else if (command === 'about') {
     ElMessageBox.alert(
-      '1.3.0 powered by Zero <zero.kwok@foxmail.com>',
+      '1.3.2 powered by Zero <zero.kwok@foxmail.com>',
       'About: Image Compare Slider - Tools',
       { confirmButtonText: 'OK' }
     );
@@ -544,6 +558,12 @@ document.title = "Image Compare Slider - Tools";
               }
             }
           }
+        }
+
+        .filename {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
       }
     }
