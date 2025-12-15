@@ -85,7 +85,7 @@ from pathlib import Path
 # 修复 Flask 静态文件的 MIME 类型问题
 mimetypes.add_type('application/javascript', '.js')
 try:
-    from flask import Flask, send_from_directory, render_template
+    from flask import Flask, send_from_directory, request, redirect
     from PIL import Image
 except ImportError as e:
     print("Missing required module. Please install dependencies with:")
@@ -248,18 +248,17 @@ def make_image_mate_data(directory: str):
 
 def run_server(dirs, indexs, host, port):
     url = f"http://{host}:{port}"
-    print(f"Running: {url}")
+    print(f"Visit: {url}{'/metadata/list.html' if indexs else ''}")
 
-    def make_handler(dir):
+    def make_handler(route, dir):
         def handler(f='index.html'):
-            # print(f"fetch: {dir}, {f}")
             return send_from_directory(dir, f)
         return handler
 
     app = Flask(__name__)
     for route, dir in dirs.items():
         print(f"  - {route}: {dir}")
-        handler = make_handler(dir)
+        handler = make_handler(route, dir)
         app.add_url_rule(route, dir, handler)
         app.add_url_rule(f'{route}/<path:f>', f'{dir}/<path:f>', handler)
 
