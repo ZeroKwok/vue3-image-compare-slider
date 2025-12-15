@@ -263,9 +263,16 @@ def run_server(dirs, indexs, host, port):
         app.add_url_rule(route, dir, handler)
         app.add_url_rule(f'{route}/<path:f>', f'{dir}/<path:f>', handler)
 
-    @app.route('/list')
-    def index_list():
-        return '<br>'.join(indexs)
+    linker = []
+    for path, url in indexs.items():
+        linker.append(f'<a href="{url}">{path}</a>')
+    @app.route('/metadata/<path:f>')
+    def metadata(f):
+        if f == 'index.json':
+            return json.dumps(indexs, ensure_ascii=False, indent=2)
+        else: # list.html
+            return '<br>'.join(linker)
+
     app.run(host=host, port=port, debug=False)
 
 def main():
@@ -327,14 +334,14 @@ def main():
                 pathDirs = json.load(f)
 
         url = f"http://{args.host}:{args.port}"
-        inds = []
+        inds = {}
         dirs = {
             '/': args.template, 
             '/images': args.directory }
         for path in pathDirs:
             stem = f'/images/{relative_path_to_url(path)}'
             dirs[stem] = os.path.abspath(os.path.join(args.directory, path))
-            inds.append(rf'<a href="{url}?data={stem}/data.json">{path}</a>')
+            inds[path] = f'{url}?data={stem}/data.json'
 
         run_server(dirs, inds, args.host, args.port)
 
