@@ -93,14 +93,22 @@ except ImportError as e:
 
 
 def read_image_info(path):
-    """读取宽、高、字节大小"""
+    """读取宽、高、文件信息"""
+    fstat = {}
+    try:
+        fstat = os.stat(path)
+        fstat = {f: getattr(fstat, f) for f in ['st_size', 'st_mtime', 'st_ctime']}
+    except OSError:
+        pass
+
+    width = height = 0
     try:
         with Image.open(path) as im:
             width, height = im.size
     except Exception:
-        width = height = 0
+        pass
+    return width, height, fstat
 
-    return width, height, os.path.getsize(path)
 
 def relative_path_to_url(path:Path):
     """将相对路径转换为 URL"""
@@ -209,7 +217,7 @@ def make_image_mate_data(directory: str):
 
             for fname, meta in files:
                 fullpath = pathCurr / fname
-                width, height, size = read_image_info(str(fullpath))
+                width, height, fstat = read_image_info(str(fullpath))
 
                 workflow = meta["workflow"]
                 elapsed = meta["elapsed"]
@@ -224,7 +232,9 @@ def make_image_mate_data(directory: str):
                     "file": '/images/' + relative_path_to_url(fullpath.relative_to(pathRoot)),
                     "width": width,
                     "height": height,
-                    "bytes": size,
+                    "st_size": fstat.get('st_size', -1),
+                    "st_ctime": fstat.get('st_ctime', -1),
+                    "st_mtime": fstat.get('st_mtime', -1),
                 }
 
                 if workflow is not None and elapsed is not None:
