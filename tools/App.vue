@@ -11,7 +11,7 @@
 
       <div class="sidebar-content">
         <div class="sidebar-controls">
-          <el-tooltip v-if="Object.keys(indexUrl).length > 0" content="索引页">
+          <el-tooltip v-if="indexUrl" content="索引页">
             <el-button circle class="index" size="small" @click="pageGoto('/metadata/list.html')">
               <el-icon><HomeFilled /></el-icon>
             </el-button>
@@ -120,8 +120,8 @@
           </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <template v-if="Object.keys(indexUrl).length > 0">
-                  <el-dropdown-item @click="pageGoto('/metadata/list.html')">索引</el-dropdown-item>
+                <template v-if="indexUrl">
+                  <el-dropdown-item @click="pageGoto('/metadata/list.html')">索引页</el-dropdown-item>
                   <el-dropdown-item v-for="(url, name) in indexUrl" :key="url" @click="pageGoto(url)">
                     {{ name }}
                   </el-dropdown-item>
@@ -300,7 +300,7 @@ const defaultData = [];
 
 // 尝试加载数据
 const loadData = ref(null);
-const indexUrl = ref({"Path": "uril"});
+const indexUrl = ref(null);
 
 onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -324,6 +324,10 @@ onMounted(async () => {
   catch (e) {
     console.warn(`load the index.json failed, `, e);
   }
+
+  // 如果存在索引页, 并且没有数据，则跳转到索引页, 因为此时是空数据页
+  if (indexUrl.value && imageData.value.length <= 0 && !urlParams.has('data'))
+    pageGoto('/metadata/list.html');
 });
 
 // 处理数据 - 如果没有传入数据，使用示例数据
