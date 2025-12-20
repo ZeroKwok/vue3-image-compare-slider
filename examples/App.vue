@@ -24,14 +24,13 @@
           </template>
         </el-dropdown>
       </div>
-
     </div>
 
     <div class="image-list">
-      <div v-for="name in examples" :key="name" class="item" :class="{ active: name === currentName }"
-        @click="currentName = name">
-        <img :src="getItemImage(name, '2')" :alt="name" />
-        <span class="name">{{ name }}</span>
+      <div v-for="(couple, index) in examples" :key="index" class="item" :class="{ active: index === currentIndex }"
+        @click="currentIndex = index">
+        <img :src="getItemImage(index, 1)" :alt="couple[1].split('_')[0]" />
+        <span class="file">{{ couple[0].split('_')[0] }}</span>
       </div>
     </div>
   </div>
@@ -42,21 +41,28 @@ import { ref, computed } from "vue";
 import ImageSliderCompare from "vue3-image-compare-slider";
 
 const examples = [
-  'portrait',
-  'grayscale',
-  'colour',
-  'darksome',
-];
-const currentName = ref(examples[0]);
+  ["portrait_origin.jpg",
+   "portrait_Flux1.0.jpg",],
 
-const getItemImage = (name, label = '1') => {
+  ["darksome_origin.jpg",
+   "darksome_Flux1.0_33.0.jpg",],
+
+  ["grayscale_origin.jpg",
+   "grayscale_Flux1.0_77.23.jpg",],
+
+  ["colour_origin.jpg",
+   "colour_Flux1.0_25.4.jpg",],
+];
+
+const currentIndex = ref(0);
+const getItemImage = (row, col = 0) => {
   if (import.meta.env.BASE_URL !== '/')
-    return `${import.meta.env.BASE_URL}/images/${name}/${label}.jpg`;
+    return `${import.meta.env.BASE_URL}/images/${examples[row][col]}`;
   else
-    return `/images/${name}/${label}.jpg`;
+    return `/images/${examples[row][col]}`;
 }
-const currentLeft = computed(() => getItemImage(currentName.value, '1'));
-const currentRight = computed(() => getItemImage(currentName.value, '2'));
+const currentLeft = computed(() => getItemImage(currentIndex.value, 0));
+const currentRight = computed(() => getItemImage(currentIndex.value, 1));
 
 const imageView = ref(null);
 const zoom = ref(100);
