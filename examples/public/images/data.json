@@ -1,0 +1,96 @@
+[
+  [
+    {
+      "label": "colour (原图)",
+      "file": "/images/colour_origin.jpg",
+      "width": 1024,
+      "height": 576,
+      "st_size": 169177,
+      "st_ctime": 1764829711.469014,
+      "st_mtime": 1763023288.4626076
+    },
+    {
+      "label": "Flux1.0",
+      "file": "/images/colour_Flux1.0_25.4.jpg",
+      "width": 1024,
+      "height": 576,
+      "st_size": 234140,
+      "st_ctime": 1764829711.4414659,
+      "st_mtime": 1763023288.4646118,
+      "elapsedTime": 25.4
+    }
+  ],
+  [
+    {
+      "label": "darksome (原图)",
+      "file": "/images/darksome_origin.jpg",
+      "width": 1200,
+      "height": 900,
+      "st_size": 87761,
+      "st_ctime": 1764829711.4924955,
+      "st_mtime": 1763023288.4666092
+    },
+    {
+      "label": "Flux1.0",
+      "file": "/images/darksome_Flux1.0_33.0.jpg",
+      "width": 1200,
+      "height": 900,
+      "st_size": 145703,
+      "st_ctime": 1764829711.477497,
+      "st_mtime": 1763023288.4676087,
+      "elapsedTime": 33.0
+    }
+  ],
+  [
+    {
+      "label": "grayscale (原图)",
+      "file": "/images/grayscale_origin.jpg",
+      "width": 4032,
+      "height": 3024,
+      "st_size": 509312,
+      "st_ctime": 1764829711.5564413,
+      "st_mtime": 1763023288.4546075
+    },
+    {
+      "label": "Flux1.0",
+      "file": "/images/grayscale_Flux1.0_77.23.jpg",
+      "width": 4032,
+      "height": 3024,
+      "st_size": 665776,
+      "st_ctime": 1764829711.5195518,
+      "st_mtime": 1763023288.4606073,
+      "elapsedTime": 77.23
+    },
+    {
+      "label": "GPT-3",
+      "file": "/images/grayscale_GPT-3_5.23.jpg",
+      "width": 1536,
+      "height": 1024,
+      "st_size": 408291,
+      "st_ctime": 1764829711.5376623,
+      "st_mtime": 1764728037.4771016,
+      "elapsedTime": 5.23
+    }
+  ],
+  [
+    {
+      "label": "portrait (原图)",
+      "file": "/images/portrait_origin.jpg",
+      "width": 256,
+      "height": 256,
+      "st_size": 25285,
+      "st_ctime": 1764741865.9822776,
+      "st_mtime": 1764741865.9832757
+    },
+    {
+      "label": "Flux",
+      "file": "/images/portrait_Flux1.0.jpg",
+      "width": 256,
+      "height": 256,
+      "st_size": 23012,
+      "st_ctime": 1764741865.9842749,
+      "st_mtime": 1764741865.9842749,
+      "elapsedTime": 1.0
+    }
+  ]
+]
