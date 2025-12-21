@@ -8,6 +8,7 @@ A simple image compare slider component for Vue 3, supporting zooming, dragging 
 
 - Supports zooming, dragging, and slider position adjustment  
 - Supports fit modes (1:1, contain, scale-down)  
+- [A lightweight visual batch image comparison tool](tools/README.md)
 
 ## Installation  
 
